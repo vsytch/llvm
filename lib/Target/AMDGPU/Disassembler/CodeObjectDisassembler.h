@@ -46,10 +46,9 @@ private:
   ErrorOr<SymbolsTy> CollectSymbols(const HSACodeObject *CodeObject);
 
   std::error_code printNotes(const HSACodeObject *CodeObject);
-  std::error_code printKernels(const HSACodeObject *CodeObject, raw_ostream &OS,
-                               raw_ostream &ES);
+  std::error_code printKernels(const HSACodeObject *CodeObject, raw_ostream &ES);
   void printKernelCode(ArrayRef<uint8_t> Bytes, uint64_t Address,
-                       SymbolsTy& Symbols, raw_ostream &OS, raw_ostream &ES);
+                       SymbolsTy& Symbols, raw_ostream &ES);
   
 
 public:
@@ -57,8 +56,7 @@ public:
                          MCDisassembler *ID, MCTargetStreamer *TS);
 
   /// @brief Disassemble and print HSA Code Object
-  std::error_code Disassemble(MemoryBufferRef Buffer, raw_ostream &OS,
-                              raw_ostream &ES);
+  std::error_code Disassemble(MemoryBufferRef Buffer, raw_ostream &ES);
 };
 } // namespace llvm
 

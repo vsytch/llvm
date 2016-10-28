@@ -15,10 +15,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "CodeObjectDisassembler.hpp"
+#include "CodeObjectDisassembler.h"
 
 #include "AMDGPU.h"
-#include "Disassembler/CodeObject.hpp"
+#include "Disassembler/CodeObject.h"
 #include "Disassembler/AMDGPUDisassembler.h"
 #include "InstPrinter/AMDGPUInstPrinter.h"
 #include "MCTargetDesc/AMDGPUTargetStreamer.h"
@@ -41,9 +41,8 @@ CodeObjectDisassembler::CodeObjectDisassembler(MCContext *C,
                                                MCInstPrinter *IP,
                                                MCDisassembler *ID,
                                                MCTargetStreamer *TS)
-  : Ctx(C), TripleName(TN), InstPrinter(IP), InstDisasm(ID) {
-  AsmStreamer = static_cast<AMDGPUTargetStreamer *>(TS);
-}
+  : Ctx(C), TripleName(TN), InstPrinter(IP), InstDisasm(ID),
+    AsmStreamer(static_cast<AMDGPUTargetStreamer *>(TS)) {}
 
 ErrorOr<CodeObjectDisassembler::SymbolsTy>
 CodeObjectDisassembler::CollectSymbols(const HSACodeObject *CodeObject) {
@@ -101,7 +100,6 @@ std::error_code CodeObjectDisassembler::printNotes(const HSACodeObject *CodeObje
 }
 
 std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeObject,
-                                                     raw_ostream &OS,
                                                      raw_ostream &ES) {
   auto SymbolsOr = CollectSymbols(CodeObject);
   if (!SymbolsOr)
@@ -113,10 +111,6 @@ std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeOb
     if (!NameEr)
       return object::object_error::parse_failed;
 
-    auto TypeEr = Sym.getType();
-    if (!TypeEr)
-      return object::object_error::parse_failed;
-
     auto KernelCodeTOr = Kernel->getAmdKernelCodeT(CodeObject);
     if (!KernelCodeTOr)
       return KernelCodeTOr.getError();
@@ -124,8 +118,8 @@ std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeOb
     auto CodeOr = CodeObject->getKernelCode(Kernel);
     if (!CodeOr)
       return CodeOr.getError();
-
-    AsmStreamer->EmitAMDGPUSymbolType(*NameEr, *TypeEr);
+    
+    AsmStreamer->EmitAMDGPUSymbolType(*NameEr, Kernel->getType());
 
     AsmStreamer->EmitAMDKernelCodeT(*(*KernelCodeTOr));
 
@@ -133,7 +127,6 @@ std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeOb
       *CodeOr,
       Kernel->getValue() + (*KernelCodeTOr)->kernel_code_entry_byte_offset,
       *SymbolsOr,
-      OS,
       ES);
 
   }
@@ -143,13 +136,10 @@ std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeOb
 void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
                                              uint64_t Address,
                                              SymbolsTy &Symbols,
-                                             raw_ostream &OS,
                                              raw_ostream &ES) {
 #ifdef NDEBUG
   const bool DebugFlag = false;
 #endif
-
-
 
   const auto &Target = getTheGCNTarget();
   std::unique_ptr<MCRelocationInfo> RelInfo(
@@ -161,14 +151,16 @@ void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
     InstDisasm->setSymbolizer(std::move(Symbolizer));
   }
 
-  OS << "// Disassembly:\n";
-  SmallString<40> InstStr, CommentStr;
+  AsmStreamer->getStreamer().EmitRawText("// Disassembly:");
+  SmallString<40> InstStr, CommentStr, OutStr;
   uint64_t Index = 0;
   while (Index < Bytes.size()) {
     InstStr.clear();
     raw_svector_ostream IS(InstStr);
     CommentStr.clear();
     raw_svector_ostream CS(CommentStr);
+    OutStr.clear();
+    raw_svector_ostream OS(OutStr);
 
     MCInst Inst;
     uint64_t EatenBytesNum = 0;
@@ -192,8 +184,7 @@ void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
     if (!CS.str().empty())
       OS << " // " << CS.str();
 
-    OS << '\n';
-    OS.flush();
+    AsmStreamer->getStreamer().EmitRawText(OS.str());
 
     Address += EatenBytesNum;
     Index += EatenBytesNum / 4;
@@ -201,7 +192,6 @@ void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
 }
 
 std::error_code CodeObjectDisassembler::Disassemble(MemoryBufferRef Buffer,
-                                                    raw_ostream &OS,
                                                     raw_ostream &ES) {
   using namespace object;
   
@@ -214,7 +204,7 @@ std::error_code CodeObjectDisassembler::Disassemble(MemoryBufferRef Buffer,
   if (EC = printNotes(&CodeObject))
     return EC;
 
-  if (EC = printKernels(&CodeObject, OS, ES))
+  if (EC = printKernels(&CodeObject, ES))
     return EC;
 
   return std::error_code();

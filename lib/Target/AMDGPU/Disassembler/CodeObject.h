@@ -14,9 +14,10 @@
 #ifndef AMDGPU_DISASSEMBLER_HSA_CODE_OBJECT_HPP
 #define AMDGPU_DISASSEMBLER_HSA_CODE_OBJECT_HPP
 
+#include "AMDKernelCodeT.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Object/ELFObjectFile.h"
-#include "AMDKernelCodeT.h"
+#include "llvm/Support/Endian.h"
 
 namespace llvm {
 
@@ -25,18 +26,18 @@ namespace llvm {
 //===----------------------------------------------------------------------===//
 
 struct amdgpu_hsa_code_object_version {
-  uint32_t major_version;
-  uint32_t minor_version;
+  support::ulittle32_t major_version;
+  support::ulittle32_t minor_version;
 };
 
 
 struct amdgpu_hsa_isa {
-  uint16_t vendor_name_size;
-  uint16_t architecture_name_size;
-  uint32_t major;
-  uint32_t minor;
-  uint32_t stepping;
-  char *names;
+  support::ulittle16_t vendor_name_size;
+  support::ulittle16_t architecture_name_size;
+  support::ulittle32_t major;
+  support::ulittle32_t minor;
+  support::ulittle32_t stepping;
+  char names[1];
 
   StringRef getVendorName() const {
     return StringRef(names, vendor_name_size);
@@ -47,7 +48,6 @@ struct amdgpu_hsa_isa {
   }
 };
 
-
 enum AMDGPU_NOTES_TYPES {
   NT_AMDGPU_HSA_CODE_OBJECT_VERSION = 1,
   NT_AMDGPU_HSA_ISA = 3,
@@ -55,9 +55,9 @@ enum AMDGPU_NOTES_TYPES {
 
 
 struct ELFNote {
-  uint32_t namesz;
-  uint32_t descsz;
-  uint32_t type;
+  support::ulittle32_t namesz;
+  support::ulittle32_t descsz;
+  support::ulittle32_t type;
 
   enum {ALIGN = 4};
 
@@ -166,7 +166,11 @@ protected:
 public:
 
   conditional_iterator(BaseIterator BI, BaseIterator E, PredicateTy P)
-    : iterator_adaptor_base(BI), End(E), Predicate(P) {}
+    : iterator_adaptor_base(BI), End(E), Predicate(P) {
+    while (I != End && !Predicate(*I)) {
+      ++I;
+    } 
+  }
 
   conditional_iterator &operator++() {
     do {

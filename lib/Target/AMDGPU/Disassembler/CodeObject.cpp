@@ -11,7 +11,7 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "CodeObject.hpp"
+#include "CodeObject.h"
 
 namespace llvm {
 
