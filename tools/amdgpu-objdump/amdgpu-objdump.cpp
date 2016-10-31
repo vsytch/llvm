@@ -42,10 +42,6 @@ InputFilename("<object file>",
               cl::Positional,
               cl::ValueRequired);
 
-static cl::opt<std::string>
-MCPU("mcpu",
-     cl::desc("GPU name"));
-
 LLVM_ATTRIBUTE_NORETURN static void report_error(StringRef ToolName,
                                                  StringRef File,
                                                  llvm::Error E) {
@@ -98,10 +94,6 @@ int main(int argc, char *argv[]) {
   if (!AsmInfo)
     report_fatal_error("error: no assembly info");
 
-  std::unique_ptr<MCSubtargetInfo> STI(TheTarget.createMCSubtargetInfo(TripleName, MCPU, ""));
-  if (!STI)
-    report_fatal_error("error: no subtarget info");
-
   std::unique_ptr<MCInstrInfo> MII(TheTarget.createMCInstrInfo());
   if (!MII)
     report_fatal_error("error: no instruction info");
@@ -109,10 +101,6 @@ int main(int argc, char *argv[]) {
   MCObjectFileInfo MOFI;
   MCContext Ctx(AsmInfo.get(), MRI.get(), &MOFI);
   MOFI.InitMCObjectFileInfo(Triple(TripleName), false, CodeModel::Default, Ctx);
-
-  std::unique_ptr<MCDisassembler> DisAsm(TheTarget.createMCDisassembler(*STI, Ctx));
-  if (!DisAsm)
-    report_fatal_error("error: no disassembler");
 
   int AsmPrinterVariant = AsmInfo->getAssemblerDialect();
   MCInstPrinter *IP(TheTarget.createMCInstPrinter(Triple(TripleName),
@@ -125,9 +113,8 @@ int main(int argc, char *argv[]) {
   std::unique_ptr<MCStreamer> MCS(
     TheTarget.createAsmStreamer(Ctx, std::move(FOut), true, false, IP,
                                 nullptr, nullptr, false));
-  
-  CodeObjectDisassembler CODisasm(&Ctx, TripleName, IP, DisAsm.get(),
-                                  MCS->getTargetStreamer());
+
+  CodeObjectDisassembler CODisasm(&Ctx, TripleName, IP, MCS->getTargetStreamer());
 
   auto EC = CODisasm.Disassemble(Binary->getMemoryBufferRef(), errs());
   if (EC)

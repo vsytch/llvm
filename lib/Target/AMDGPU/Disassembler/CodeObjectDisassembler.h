@@ -35,7 +35,6 @@ private:
   MCContext *Ctx;
   StringRef TripleName;
   MCInstPrinter *InstPrinter;
-  MCDisassembler *InstDisasm;
   AMDGPUTargetStreamer *AsmStreamer;
 
   CodeObjectDisassembler(const CodeObjectDisassembler&) = delete;
@@ -47,13 +46,13 @@ private:
 
   std::error_code printNotes(const HSACodeObject *CodeObject);
   std::error_code printKernels(const HSACodeObject *CodeObject, raw_ostream &ES);
-  void printKernelCode(ArrayRef<uint8_t> Bytes, uint64_t Address,
-                       SymbolsTy& Symbols, raw_ostream &ES);
+  void printKernelCode(const MCDisassembler &InstDisasm, ArrayRef<uint8_t> Bytes,
+                       uint64_t Address, const SymbolsTy &Symbols, raw_ostream &ES);
   
 
 public:
   CodeObjectDisassembler(MCContext *C, StringRef TripleName, MCInstPrinter *IP,
-                         MCDisassembler *ID, MCTargetStreamer *TS);
+                         MCTargetStreamer *TS);
 
   /// @brief Disassemble and print HSA Code Object
   std::error_code Disassemble(MemoryBufferRef Buffer, raw_ostream &ES);

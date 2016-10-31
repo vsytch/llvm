@@ -52,9 +52,9 @@ void HSACodeObject::InitMarkers() const {
 
   for (const auto &Sym : kernels()) {
     auto Kernel = KernelSym::asKernelSym(getSymbol(Sym.getRawDataRefImpl())).get();
-    KernelMarkers.push_back(Kernel->getValue());
+    KernelMarkers.push_back(Kernel->st_value);
     if (auto KernelCodeOr = Kernel->getAmdKernelCodeT(this)) {
-      KernelMarkers.push_back(Kernel->getValue() + (*KernelCodeOr)->kernel_code_entry_byte_offset);
+      KernelMarkers.push_back(Kernel->st_value + (*KernelCodeOr)->kernel_code_entry_byte_offset);
     }
   }
 
@@ -118,9 +118,13 @@ ErrorOr<ArrayRef<uint8_t>> HSACodeObject::getKernelCode(const KernelSym *Kernel)
 
   uint64_t CodeStart = Kernel->getValue() +
                        (*KernelCodeTOr)->kernel_code_entry_byte_offset;
-  uint64_t CodeEnd = *std::upper_bound(KernelMarkers.begin(),
-                                       KernelMarkers.end(),
-                                       CodeStart);
+  auto CodeEndI = std::upper_bound(KernelMarkers.begin(),
+                                   KernelMarkers.end(),
+                                   CodeStart);
+  uint64_t CodeEnd = CodeStart;
+  if (CodeEndI != KernelMarkers.end())
+    CodeEnd = *CodeEndI;
+  
   return SecBytesOr->slice(CodeStart, CodeEnd - CodeStart);
 }
 

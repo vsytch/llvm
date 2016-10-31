@@ -39,9 +39,8 @@ using namespace llvm;
 CodeObjectDisassembler::CodeObjectDisassembler(MCContext *C,
                                                StringRef TN,
                                                MCInstPrinter *IP,
-                                               MCDisassembler *ID,
                                                MCTargetStreamer *TS)
-  : Ctx(C), TripleName(TN), InstPrinter(IP), InstDisasm(ID),
+  : Ctx(C), TripleName(TN), InstPrinter(IP),
     AsmStreamer(static_cast<AMDGPUTargetStreamer *>(TS)) {}
 
 ErrorOr<CodeObjectDisassembler::SymbolsTy>
@@ -75,9 +74,11 @@ std::error_code CodeObjectDisassembler::printNotes(const HSACodeObject *CodeObje
       if (!VersionOr)
         return VersionOr.getError();
 
+      auto *Version = *VersionOr;
       AsmStreamer->EmitDirectiveHSACodeObjectVersion(
-        (*VersionOr)->major_version,
-        (*VersionOr)->minor_version);
+        Version->major_version,
+        Version->minor_version);
+      AsmStreamer->getStreamer().EmitRawText("");
       break;
     }
 
@@ -86,12 +87,14 @@ std::error_code CodeObjectDisassembler::printNotes(const HSACodeObject *CodeObje
       if (!IsaOr)
         return IsaOr.getError();
 
+      auto *Isa = *IsaOr;
       AsmStreamer->EmitDirectiveHSACodeObjectISA(
-        (*IsaOr)->major,
-        (*IsaOr)->minor,
-        (*IsaOr)->stepping,
-        (*IsaOr)->getVendorName(),
-        (*IsaOr)->getArchitectureName());
+        Isa->major,
+        Isa->minor,
+        Isa->stepping,
+        Isa->getVendorName(),
+        Isa->getArchitectureName());
+      AsmStreamer->getStreamer().EmitRawText("");
       break;
     }
     }
@@ -99,12 +102,55 @@ std::error_code CodeObjectDisassembler::printNotes(const HSACodeObject *CodeObje
   return std::error_code();
 }
 
+static std::string getCPUName(const HSACodeObject *CodeObject) {
+  for (const auto &Note : CodeObject->notes()) {
+    if (!Note)
+      return "";
+
+    if (Note->type == NT_AMDGPU_HSA_ISA) {
+      auto IsaOr = Note->as<amdgpu_hsa_isa>();
+      if (!IsaOr)
+        return "";
+      auto *Isa = *IsaOr;
+
+      SmallString<6> OutStr;
+      raw_svector_ostream OS(OutStr);
+      OS << "gfx" << Isa->major << Isa->minor << Isa->stepping;
+      return OS.str();
+    }
+  }
+  return "";
+}
+
 std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeObject,
                                                      raw_ostream &ES) {
+  // setup disassembler
   auto SymbolsOr = CollectSymbols(CodeObject);
   if (!SymbolsOr)
     return SymbolsOr.getError();
   
+  const auto &Target = getTheGCNTarget();
+  std::unique_ptr<MCSubtargetInfo> STI(
+    Target.createMCSubtargetInfo(TripleName, getCPUName(CodeObject), ""));
+  if (!STI)
+    return object::object_error::parse_failed;
+
+  std::unique_ptr<MCDisassembler> InstDisasm(
+    Target.createMCDisassembler(*STI, *Ctx));
+  if (!InstDisasm)
+    return object::object_error::parse_failed;
+
+  std::unique_ptr<MCRelocationInfo> RelInfo(
+    Target.createMCRelocationInfo(TripleName, *Ctx));
+  if (RelInfo) {
+    std::unique_ptr<MCSymbolizer> Symbolizer(
+      Target.createMCSymbolizer(
+        TripleName, nullptr, nullptr, &(*SymbolsOr), Ctx, std::move(RelInfo)));
+    InstDisasm->setSymbolizer(std::move(Symbolizer));
+  }
+
+
+  // print kernels
   for (const auto &Sym : CodeObject->kernels()) {
     auto Kernel = KernelSym::asKernelSym(CodeObject->getSymbol(Sym.getRawDataRefImpl())).get();
     auto NameEr = Sym.getName();
@@ -120,10 +166,15 @@ std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeOb
       return CodeOr.getError();
     
     AsmStreamer->EmitAMDGPUSymbolType(*NameEr, Kernel->getType());
+    AsmStreamer->getStreamer().EmitRawText("");
+
+    AsmStreamer->getStreamer().EmitRawText(*NameEr + ":");
 
     AsmStreamer->EmitAMDKernelCodeT(*(*KernelCodeTOr));
+    AsmStreamer->getStreamer().EmitRawText("");
 
     printKernelCode(
+      *InstDisasm,
       *CodeOr,
       Kernel->getValue() + (*KernelCodeTOr)->kernel_code_entry_byte_offset,
       *SymbolsOr,
@@ -133,28 +184,36 @@ std::error_code CodeObjectDisassembler::printKernels(const HSACodeObject *CodeOb
   return std::error_code();
 }
 
-void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
+template <typename T>
+static ArrayRef<T> trimTrailingZeroes(ArrayRef<T> A, size_t Limit) {
+  const auto SizeLimit = (Limit < A.size()) ? (A.size() - Limit) : 0;
+  while (A.size() > SizeLimit && !A.back())
+    A = A.drop_back();
+  return A;
+}
+
+template <typename OriginalTy, typename TargetTy>
+static TargetTy front(ArrayRef<OriginalTy> A) {
+  assert(A.size() >= sizeof(TargetTy));
+  return *reinterpret_cast<const TargetTy *>(A.data());
+}
+
+void CodeObjectDisassembler::printKernelCode(const MCDisassembler &InstDisasm,
+                                             ArrayRef<uint8_t> Bytes,
                                              uint64_t Address,
-                                             SymbolsTy &Symbols,
+                                             const SymbolsTy &Symbols,
                                              raw_ostream &ES) {
 #ifdef NDEBUG
   const bool DebugFlag = false;
 #endif
 
-  const auto &Target = getTheGCNTarget();
-  std::unique_ptr<MCRelocationInfo> RelInfo(
-    Target.createMCRelocationInfo(TripleName, *Ctx));
-  if (RelInfo) {
-    std::unique_ptr<MCSymbolizer> Symbolizer(
-      Target.createMCSymbolizer(
-        TripleName, nullptr, nullptr, &Symbols, Ctx, std::move(RelInfo)));
-    InstDisasm->setSymbolizer(std::move(Symbolizer));
-  }
+  Bytes = trimTrailingZeroes(Bytes, 256);
 
   AsmStreamer->getStreamer().EmitRawText("// Disassembly:");
   SmallString<40> InstStr, CommentStr, OutStr;
-  uint64_t Index = 0;
-  while (Index < Bytes.size()) {
+  for (uint64_t Index = 0; Index < Bytes.size();) {
+    ArrayRef<uint8_t> Code = Bytes.slice(Index);
+
     InstStr.clear();
     raw_svector_ostream IS(InstStr);
     CommentStr.clear();
@@ -162,14 +221,21 @@ void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
     OutStr.clear();
     raw_svector_ostream OS(OutStr);
 
+    // check for labels
+    for (const auto &Sym: Symbols) {
+      if (std::get<0>(Sym) == Address && std::get<2>(Sym) == ELF::STT_NOTYPE) {
+        OS << std::get<1>(Sym) << ":\n";
+      }
+    }
+
     MCInst Inst;
     uint64_t EatenBytesNum = 0;
-    if (InstDisasm->getInstruction(Inst, EatenBytesNum,
-                                   Bytes.slice(Index),
-                                   Address,
-                                   DebugFlag ? dbgs() : nulls(),
-                                   CS)) {
-      InstPrinter->printInst(&Inst, IS, "", InstDisasm->getSubtargetInfo());
+    if (InstDisasm.getInstruction(Inst, EatenBytesNum,
+                                  Code,
+                                  Address,
+                                  DebugFlag ? dbgs() : nulls(),
+                                  CS)) {
+      InstPrinter->printInst(&Inst, IS, "", InstDisasm.getSubtargetInfo());
     } else {
       IS << "\t// unrecognized instruction ";
       if (EatenBytesNum == 0)
@@ -178,8 +244,9 @@ void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
     assert(0 == EatenBytesNum % 4);
 
     OS << left_justify(IS.str(), 60) << format("// %012X:", Address);
-    for (auto D : Bytes.slice(Index, EatenBytesNum / 4))
-      OS << format(" %08X", D);
+    for (uint64_t i = 0; i < EatenBytesNum / 4; ++i) {
+      OS << format(" %08X", front<uint8_t, uint32_t>(Code));
+    }
 
     if (!CS.str().empty())
       OS << " // " << CS.str();
@@ -187,8 +254,9 @@ void CodeObjectDisassembler::printKernelCode(ArrayRef<uint8_t> Bytes,
     AsmStreamer->getStreamer().EmitRawText(OS.str());
 
     Address += EatenBytesNum;
-    Index += EatenBytesNum / 4;
+    Index += EatenBytesNum;
   }
+  AsmStreamer->getStreamer().EmitRawText("");
 }
 
 std::error_code CodeObjectDisassembler::Disassemble(MemoryBufferRef Buffer,
@@ -201,10 +269,12 @@ std::error_code CodeObjectDisassembler::Disassemble(MemoryBufferRef Buffer,
   if (EC)
     return EC;
 
-  if (EC = printNotes(&CodeObject))
+  EC = printNotes(&CodeObject);
+  if (EC)
     return EC;
 
-  if (EC = printKernels(&CodeObject, ES))
+  EC = printKernels(&CodeObject, ES);
+  if (EC)
     return EC;
 
   return std::error_code();

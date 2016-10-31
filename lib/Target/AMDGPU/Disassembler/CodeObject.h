@@ -15,6 +15,7 @@
 #define AMDGPU_DISASSEMBLER_HSA_CODE_OBJECT_HPP
 
 #include "AMDKernelCodeT.h"
+#include "llvm/ADT/iterator.h"
 #include "llvm/ADT/StringRef.h"
 #include "llvm/Object/ELFObjectFile.h"
 #include "llvm/Support/Endian.h"
@@ -40,11 +41,11 @@ struct amdgpu_hsa_isa {
   char names[1];
 
   StringRef getVendorName() const {
-    return StringRef(names, vendor_name_size);
+    return StringRef(names, vendor_name_size - 1);
   }
 
   StringRef getArchitectureName() const {
-    return StringRef(names + vendor_name_size, architecture_name_size);
+    return StringRef(names + vendor_name_size, architecture_name_size - 1);
   }
 };
 
@@ -157,7 +158,9 @@ class conditional_iterator : public iterator_adaptor_base<
                                               std::forward_iterator_tag> {
   
 public:
-  typedef std::function<bool(const value_type&)> PredicateTy;
+  typedef std::function<
+    bool(const typename conditional_iterator::iterator_adaptor_base::value_type&)
+  > PredicateTy;
   
 protected:
   BaseIterator End;
@@ -166,16 +169,16 @@ protected:
 public:
 
   conditional_iterator(BaseIterator BI, BaseIterator E, PredicateTy P)
-    : iterator_adaptor_base(BI), End(E), Predicate(P) {
-    while (I != End && !Predicate(*I)) {
-      ++I;
+    : conditional_iterator::iterator_adaptor_base(BI), End(E), Predicate(P) {
+    while (this->I != End && !Predicate(*this->I)) {
+      ++this->I;
     } 
   }
 
   conditional_iterator &operator++() {
     do {
-      ++I;
-    } while (I != End && !Predicate(*I));
+      ++this->I;
+    } while (this->I != End && !Predicate(*this->I));
     return *this;
   }
 };
