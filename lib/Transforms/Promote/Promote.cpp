@@ -7,12 +7,11 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file implements a pass to promote variables to correct addrspace to
-// adhere SPIR specification.
+// This file implements a pass to promote variables to generic addrspace
 //
 //===----------------------------------------------------------------------===//
 
-#define DEBUG_TYPE "PromoteGlobals"
+#define DEBUG_TYPE "PromoteGeneric"
 
 #include "Promote.h"
 
@@ -48,7 +47,8 @@ enum {
         PrivateAddressSpace = 0,
         GlobalAddressSpace = 1,
         ConstantAddressSpace = 2,
-        LocalAddressSpace = 3
+        LocalAddressSpace = 3,
+        GenericAddressSpace = 4
 };
 
 class InstUpdateWorkList;
@@ -423,7 +423,7 @@ NamedMDNode * getNewKernelListMDNode (Module & M)
         return M.getOrInsertNamedMetadata(KernelListMDNodeName);
 }
 
-Type * mapTypeToGlobal ( Type *);
+Type * mapTypeToGeneric ( Type *);
 
 namespace {
   std::map<StructType*, StructType*> structTypeMap;
@@ -432,7 +432,7 @@ namespace {
   std::map<Type *, Type *> translatedTypeMap;
 }
 
-StructType* mapTypeToGlobal(StructType* T) {
+StructType* mapTypeToGeneric(StructType* T) {
   // create a new, empty StructType
   StructType* newST = nullptr;
   if (T->hasName()) {
@@ -458,14 +458,14 @@ StructType* mapTypeToGlobal(StructType* T) {
     if (PointerType* PT = dyn_cast<PointerType>(baseType)) {
       if (StructType* pointedStructType = dyn_cast<StructType>(PT->getElementType())) {
         if (structTypeMap.find(pointedStructType) != structTypeMap.end()) {
-          translatedType = PointerType::get(structTypeMap[pointedStructType], GlobalAddressSpace);
+          translatedType = PointerType::get(structTypeMap[pointedStructType], GenericAddressSpace);
         }
       }
     }
 
     // use normal type translation logic if otherwise
     if (translatedType == nullptr) {
-      translatedType = mapTypeToGlobal(baseType);
+      translatedType = mapTypeToGeneric(baseType);
 
       // associate the newly created translated type with the old type
       translatedTypeMap[baseType] = translatedType;
@@ -480,52 +480,52 @@ StructType* mapTypeToGlobal(StructType* T) {
   return newST;
 }
 
-ArrayType * mapTypeToGlobal ( ArrayType * T )
+ArrayType * mapTypeToGeneric ( ArrayType * T )
 {
-        Type* translatedType = mapTypeToGlobal(T->getElementType());
+        Type* translatedType = mapTypeToGeneric(T->getElementType());
         return ArrayType::get(translatedType, T->getNumElements());
 }
 
-PointerType * mapTypeToGlobal ( PointerType * PT )
+PointerType * mapTypeToGeneric ( PointerType * PT )
 {
-        Type * translatedType = mapTypeToGlobal ( PT->getElementType());
-        return PointerType::get ( translatedType, GlobalAddressSpace );
+        Type * translatedType = mapTypeToGeneric ( PT->getElementType());
+        return PointerType::get ( translatedType, GenericAddressSpace );
 }
 
-SequentialType * mapTypeToGlobal ( SequentialType * T ) {
+SequentialType * mapTypeToGeneric ( SequentialType * T ) {
         ArrayType * AT = dyn_cast<ArrayType> (T);
-        if ( AT ) return mapTypeToGlobal (AT);
+        if ( AT ) return mapTypeToGeneric (AT);
 
         PointerType * PT = dyn_cast<PointerType> (T);
-        if ( PT ) return mapTypeToGlobal (PT);
+        if ( PT ) return mapTypeToGeneric (PT);
 
         return T;
 }
 
-CompositeType * mapTypeToGlobal (CompositeType * T)
+CompositeType * mapTypeToGeneric (CompositeType * T)
 {
         StructType * ST = dyn_cast<StructType> (T);
-        if ( ST ) return mapTypeToGlobal ( ST );
+        if ( ST ) return mapTypeToGeneric ( ST );
 
         SequentialType * SQ = dyn_cast<SequentialType> (T);
-        if ( SQ ) return mapTypeToGlobal ( SQ );
+        if ( SQ ) return mapTypeToGeneric ( SQ );
 
         DEBUG (llvm::errs () << "Unknown type "; T->dump(); );
         return T;
 }
 
-Type * mapTypeToGlobal (Type * T)
+Type * mapTypeToGeneric (Type * T)
 {
         CompositeType * C = dyn_cast<CompositeType>(T);
         if ( !C ) return T;
-        return mapTypeToGlobal (C);
+        return mapTypeToGeneric (C);
 }
 
 /* Create a new function type based on the provided function so that
    each arguments that are pointers, or pointer types within composite
-   types, are pointer to global */
+   types, are pointer to generic */
 
-FunctionType * createNewFunctionTypeWithPtrToGlobals (Function * F)
+FunctionType * createNewFunctionTypeWithPtrToGeneric (Function * F)
 {
         FunctionType * baseType = F->getFunctionType();
 
@@ -560,12 +560,12 @@ FunctionType * createNewFunctionTypeWithPtrToGlobals (Function * F)
                                     Type * elementType =
                                             ptrType->getElementType();
                                     Type * translatedElement =
-                                            mapTypeToGlobal(elementType);
+                                            mapTypeToGeneric(elementType);
                                     translatedType =
                                             PointerType::get(translatedElement,
-                                                             0);
+                                                             GenericAddressSpace);
                             } else {
-                                    translatedType = mapTypeToGlobal (argType);
+                                    translatedType = mapTypeToGeneric (argType);
                             }
                     }
 
@@ -577,7 +577,7 @@ FunctionType * createNewFunctionTypeWithPtrToGlobals (Function * F)
         }
 
         FunctionType * newType
-                = FunctionType::get(mapTypeToGlobal(baseType->getReturnType()),
+                = FunctionType::get(mapTypeToGeneric(baseType->getReturnType()),
                                     ArrayRef<Type *>(translatedArgTypes),
                                     baseType->isVarArg());
         return newType;
@@ -873,7 +873,7 @@ static Type *ReMapPointerTypeAccordingToAddressSpace(Type *LHS, Type *RHS) {
     T = PointerType::get( ReMapPointerTypeAccordingToAddressSpace(LPT->getElementType(), RPT->getElementType()),
                           LPT->getAddressSpace() );
   } else {
-    T = mapTypeToGlobal(RHS);
+    T = mapTypeToGeneric(RHS);
   }
   DEBUG(llvm::errs() << "return: "; T->dump(););
   return T;
@@ -1129,7 +1129,7 @@ bool CheckCalledFunction ( CallInst * CI, InstUpdateWorkList * updates,
                 return false;
         }
 
-        Type * returnType = mapTypeToGlobal (CalledType->getReturnType());
+        Type * returnType = mapTypeToGeneric (CalledType->getReturnType());
 
         newFunctionType =
                 FunctionType::get(returnType,
@@ -1422,7 +1422,7 @@ void promoteGlobalVars(Function *Func, InstUpdateWorkList * updateNeeded)
             // promote to global address space if the variable is used in a kernel
             // and does not come with predefined address space
           if (I->getType()->getPointerAddressSpace() == 0) {
-            the_space = GlobalAddressSpace;
+            the_space = GenericAddressSpace;
           } else {
             continue;
           }
@@ -1431,7 +1431,7 @@ void promoteGlobalVars(Function *Func, InstUpdateWorkList * updateNeeded)
         // If the address of this global variable is available from host, it
         // must stay in global address space.
         if (isAddressCopiedToHost(*I, *Func))
-            the_space = GlobalAddressSpace;
+            the_space = GenericAddressSpace;
         DEBUG(llvm::errs() << "Promoting variable: " << *I << "\n";
                 errs() << "  to addrspace(" << the_space << ")\n";);
 
@@ -1520,7 +1520,7 @@ void promoteAllocas (Function * Func,
              isa<AllocaInst>(I); ++I) {
                 AllocaInst * AI = cast<AllocaInst>(I);
                 Type * allocatedType = AI->getType()->getElementType();
-                Type * promotedType = mapTypeToGlobal(allocatedType);
+                Type * promotedType = mapTypeToGeneric(allocatedType);
 
                 if ( allocatedType == promotedType ) continue;
 
@@ -1706,7 +1706,7 @@ Function * createPromotedFunctionToType ( Function * F, FunctionType * promoteTy
 Function * createPromotedFunction ( Function * F )
 {
         FunctionType * promotedType =
-                createNewFunctionTypeWithPtrToGlobals (F);
+                createNewFunctionTypeWithPtrToGeneric (F);
         return createPromotedFunctionToType (F, promotedType);
 }
 
@@ -1907,28 +1907,28 @@ Function * createWrappedFunction (Function * F)
 }
 
 
-class PromoteGlobals : public ModulePass {
+class PromoteGeneric : public ModulePass {
         public:
         static char ID;
-        PromoteGlobals();
-        virtual ~PromoteGlobals();
+        PromoteGeneric();
+        virtual ~PromoteGeneric();
         virtual void getAnalysisUsage(AnalysisUsage& AU) const;
         bool runOnModule(Module& M);
 };
 } // ::<unnamed> namespace
 
-PromoteGlobals::PromoteGlobals() : ModulePass(ID)
+PromoteGeneric::PromoteGeneric() : ModulePass(ID)
 {}
 
-PromoteGlobals::~PromoteGlobals()
+PromoteGeneric::~PromoteGeneric()
 {}
 
-void PromoteGlobals::getAnalysisUsage(AnalysisUsage& AU) const
+void PromoteGeneric::getAnalysisUsage(AnalysisUsage& AU) const
 {
         AU.addRequired<CallGraphWrapperPass>();
 }
 
-bool PromoteGlobals::runOnModule(Module& M)
+bool PromoteGeneric::runOnModule(Module& M)
 {
         FunctionVect foundKernels;
         FunctionMap promotedKernels;
@@ -1993,15 +1993,11 @@ bool PromoteGlobals::runOnModule(Module& M)
 }
 
 
-char PromoteGlobals::ID = 0;
-#if 1
-static RegisterPass<PromoteGlobals>
-Y("promote-globals", "Promote Pointer To Global Pass");
-#else
-INITIALIZE_PASS(PromoteGlobals, "promote-globals", "Promote Pointer to Global", false, false);
-#endif
+char PromoteGeneric::ID = 0;
+static RegisterPass<PromoteGeneric>
+Y("promote-generic", "Promote Pointer To Generic Pass");
 
-llvm::ModulePass * createPromoteGlobalsPass ()
+llvm::ModulePass * createPromoteGenericPass ()
 {
-        return new PromoteGlobals;
+        return new PromoteGeneric;
 }
