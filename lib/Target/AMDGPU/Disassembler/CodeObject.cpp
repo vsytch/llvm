@@ -131,7 +131,11 @@ ErrorOr<ArrayRef<uint8_t>> HSACodeObject::getKernelCode(const KernelSym *Kernel)
 ErrorOr<const HSACodeObject::Elf_Shdr *> 
 HSACodeObject::getSectionByName(StringRef Name) const {
   auto ELF = getELFFile();
-  for (const auto &Sec : ELF->sections()) {
+  auto SectionsOr = ELF->sections();
+  if (!SectionsOr)
+    return SectionsOr.getError();
+  
+  for (const auto &Sec : *SectionsOr) {
     auto SecNameOr = ELF->getSectionName(&Sec);
     if (std::error_code EC = SecNameOr.getError()) {
       return EC;
@@ -145,7 +149,11 @@ HSACodeObject::getSectionByName(StringRef Name) const {
 ErrorOr<uint32_t> HSACodeObject::getSectionIdxByName(StringRef Name) const {
   auto ELF = getELFFile();
   uint32_t Idx = 0;
-  for (const auto &Sec : ELF->sections()) {
+  auto SectionsOr = ELF->sections();
+  if (!SectionsOr)
+    return SectionsOr.getError();
+
+  for (const auto &Sec : *SectionsOr) {
     auto SecNameOr = ELF->getSectionName(&Sec);
     if (std::error_code EC = SecNameOr.getError()) {
       return EC;
