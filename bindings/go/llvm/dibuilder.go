@@ -297,10 +297,11 @@ func (d *DIBuilder) CreateBasicType(t DIBasicType) Metadata {
 
 // DIPointerType holds the values for creating pointer type debug metadata.
 type DIPointerType struct {
-	Pointee     Metadata
-	SizeInBits  uint64
-	AlignInBits uint32 // optional
-	Name        string // optional
+	Pointee      Metadata
+	SizeInBits   uint64
+	AlignInBits  uint32 // optional
+	AddressSpace int    // optional
+	Name         string // optional
 }
 
 // CreateBasicType creates basic type debug metadata.
@@ -312,6 +313,7 @@ func (d *DIBuilder) CreatePointerType(t DIPointerType) Metadata {
 		t.Pointee.C,
 		C.uint64_t(t.SizeInBits),
 		C.uint32_t(t.AlignInBits),
+		C.unsigned(t.AddressSpace),
 		name,
 	)
 	return Metadata{C: result}

@@ -688,10 +688,18 @@ Error MetadataLoader::MetadataLoaderImpl::parseMetadata(bool ModuleLevel,
       break;
     }
     case bitc::METADATA_DERIVED_TYPE: {
-      if (Record.size() != 12)
+      if (Record.size() < 12 || Record.size() > 13)
         return error("Invalid record");
 
       IsDistinct = Record[0];
+
+      unsigned AddressSpace = 0;
+      if (Record.size() > 12) {
+        if (Record[12] > (uint64)std::numeric_limits<unsigned>::max())
+          return error("Address space value is too large");
+        AddressSpace = Record[12];
+      }
+
       DINode::DIFlags Flags = static_cast<DINode::DIFlags>(Record[10]);
       MetadataList.assignValue(
           GET_OR_DISTINCT(DIDerivedType,
@@ -699,7 +707,8 @@ Error MetadataLoader::MetadataLoaderImpl::parseMetadata(bool ModuleLevel,
                            getMDOrNull(Record[3]), Record[4],
                            getDITypeRefOrNull(Record[5]),
                            getDITypeRefOrNull(Record[6]), Record[7], Record[8],
-                           Record[9], Flags, getDITypeRefOrNull(Record[11]))),
+                           Record[9], AddressSpace, Flags,
+                           getDITypeRefOrNull(Record[11]))),
           NextMetadataNo++);
       break;
     }

@@ -116,10 +116,11 @@ LLVMMetadataRef LLVMDIBuilderCreatePointerType(LLVMDIBuilderRef Dref,
                                                LLVMMetadataRef PointeeType,
                                                uint64_t SizeInBits,
                                                uint32_t AlignInBits,
+                                               unsigned AddressSpace,
                                                const char *Name) {
   DIBuilder *D = unwrap(Dref);
   return wrap(D->createPointerType(unwrap<DIType>(PointeeType), SizeInBits,
-                                   AlignInBits, Name));
+                                   AlignInBits, AddressSpace, Name));
 }
 
 LLVMMetadataRef

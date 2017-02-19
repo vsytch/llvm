@@ -3934,7 +3934,8 @@ bool LLParser::ParseDIBasicType(MDNode *&Result, bool IsDistinct) {
 /// ParseDIDerivedType:
 ///   ::= !DIDerivedType(tag: DW_TAG_pointer_type, name: "int", file: !0,
 ///                      line: 7, scope: !1, baseType: !2, size: 32,
-///                      align: 32, offset: 0, flags: 0, extraData: !3)
+///                      align: 32, offset: 0, addressSpace: 1, flags: 0,
+///                      extraData: !3)
 bool LLParser::ParseDIDerivedType(MDNode *&Result, bool IsDistinct) {
 #define VISIT_MD_FIELDS(OPTIONAL, REQUIRED)                                    \
   REQUIRED(tag, DwarfTagField, );                                              \
@@ -3946,6 +3947,7 @@ bool LLParser::ParseDIDerivedType(MDNode *&Result, bool IsDistinct) {
   OPTIONAL(size, MDUnsignedField, (0, UINT64_MAX));                            \
   OPTIONAL(align, MDUnsignedField, (0, UINT32_MAX));                           \
   OPTIONAL(offset, MDUnsignedField, (0, UINT64_MAX));                          \
+  OPTIONAL(addressSpace, MDUnsignedField, (0, UINT32_MAX));                    \
   OPTIONAL(flags, DIFlagField, );                                              \
   OPTIONAL(extraData, MDField, );
   PARSE_MD_FIELDS();
@@ -3954,7 +3956,8 @@ bool LLParser::ParseDIDerivedType(MDNode *&Result, bool IsDistinct) {
   Result = GET_OR_DISTINCT(DIDerivedType,
                            (Context, tag.Val, name.Val, file.Val, line.Val,
                             scope.Val, baseType.Val, size.Val, align.Val,
-                            offset.Val, flags.Val, extraData.Val));
+                            offset.Val, addressSpace.Val, flags.Val,
+                            extraData.Val));
   return false;
 }
 

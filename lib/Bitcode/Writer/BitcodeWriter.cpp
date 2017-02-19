@@ -1470,6 +1470,7 @@ void ModuleBitcodeWriter::writeDIDerivedType(const DIDerivedType *N,
   Record.push_back(N->getOffsetInBits());
   Record.push_back(N->getFlags());
   Record.push_back(VE.getMetadataOrNullID(N->getExtraData()));
+  Record.push_back(N->getAddressSpace());
 
   Stream.EmitRecord(bitc::METADATA_DERIVED_TYPE, Record, Abbrev);
   Record.clear();

@@ -1604,6 +1604,7 @@ static void writeDIDerivedType(raw_ostream &Out, const DIDerivedType *N,
   Printer.printInt("size", N->getSizeInBits());
   Printer.printInt("align", N->getAlignInBits());
   Printer.printInt("offset", N->getOffsetInBits());
+  Printer.printInt("addressSpace", N->getAddressSpace());
   Printer.printDIFlags("flags", N->getFlags());
   Printer.printMetadata("extraData", N->getRawExtraData());
   Out << ")";

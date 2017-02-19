@@ -201,17 +201,18 @@ DIBasicType *DIBuilder::createBasicType(StringRef Name, uint64_t SizeInBits,
 
 DIDerivedType *DIBuilder::createQualifiedType(unsigned Tag, DIType *FromTy) {
   return DIDerivedType::get(VMContext, Tag, "", nullptr, 0, nullptr, FromTy, 0,
-                            0, 0, DINode::FlagZero);
+                            0, 0, 0, DINode::FlagZero);
 }
 
 DIDerivedType *DIBuilder::createPointerType(DIType *PointeeTy,
                                             uint64_t SizeInBits,
                                             uint32_t AlignInBits,
+                                            unsigned AddressSpace,
                                             StringRef Name) {
   // FIXME: Why is there a name here?
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_pointer_type, Name,
                             nullptr, 0, nullptr, PointeeTy, SizeInBits,
-                            AlignInBits, 0, DINode::FlagZero);
+                            AlignInBits, 0, AddressSpace, DINode::FlagZero);
 }
 
 DIDerivedType *DIBuilder::createMemberPointerType(DIType *PointeeTy,
@@ -221,15 +222,17 @@ DIDerivedType *DIBuilder::createMemberPointerType(DIType *PointeeTy,
                                                   DINode::DIFlags Flags) {
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_ptr_to_member_type, "",
                             nullptr, 0, nullptr, PointeeTy, SizeInBits,
-                            AlignInBits, 0, Flags, Base);
+                            AlignInBits, 0, 0, Flags, Base);
 }
 
 DIDerivedType *DIBuilder::createReferenceType(unsigned Tag, DIType *RTy,
                                               uint64_t SizeInBits,
-                                              uint32_t AlignInBits) {
+                                              uint32_t AlignInBits,
+                                              unsigned AddressSpace) {
   assert(RTy && "Unable to create reference type");
   return DIDerivedType::get(VMContext, Tag, "", nullptr, 0, nullptr, RTy,
-                            SizeInBits, AlignInBits, 0, DINode::FlagZero);
+                            SizeInBits, AlignInBits, 0, AddressSpace,
+                            DINode::FlagZero);
 }
 
 DIDerivedType *DIBuilder::createTypedef(DIType *Ty, StringRef Name,
@@ -237,14 +240,14 @@ DIDerivedType *DIBuilder::createTypedef(DIType *Ty, StringRef Name,
                                         DIScope *Context) {
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_typedef, Name, File,
                             LineNo, getNonCompileUnitScope(Context), Ty, 0, 0,
-                            0, DINode::FlagZero);
+                            0, 0, DINode::FlagZero);
 }
 
 DIDerivedType *DIBuilder::createFriend(DIType *Ty, DIType *FriendTy) {
   assert(Ty && "Invalid type!");
   assert(FriendTy && "Invalid friend type!");
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_friend, "", nullptr, 0, Ty,
-                            FriendTy, 0, 0, 0, DINode::FlagZero);
+                            FriendTy, 0, 0, 0, 0, DINode::FlagZero);
 }
 
 DIDerivedType *DIBuilder::createInheritance(DIType *Ty, DIType *BaseTy,
@@ -252,7 +255,7 @@ DIDerivedType *DIBuilder::createInheritance(DIType *Ty, DIType *BaseTy,
                                             DINode::DIFlags Flags) {
   assert(Ty && "Unable to create inheritance");
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_inheritance, "", nullptr,
-                            0, Ty, BaseTy, 0, 0, BaseOffset, Flags);
+                            0, Ty, BaseTy, 0, 0, BaseOffset, 0, Flags);
 }
 
 DIDerivedType *DIBuilder::createMemberType(DIScope *Scope, StringRef Name,
@@ -263,7 +266,7 @@ DIDerivedType *DIBuilder::createMemberType(DIScope *Scope, StringRef Name,
                                            DINode::DIFlags Flags, DIType *Ty) {
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_member, Name, File,
                             LineNumber, getNonCompileUnitScope(Scope), Ty,
-                            SizeInBits, AlignInBits, OffsetInBits, Flags);
+                            SizeInBits, AlignInBits, OffsetInBits, 0, Flags);
 }
 
 static ConstantAsMetadata *getConstantOrNull(Constant *C) {
@@ -280,7 +283,7 @@ DIDerivedType *DIBuilder::createBitFieldMemberType(
   return DIDerivedType::get(
       VMContext, dwarf::DW_TAG_member, Name, File, LineNumber,
       getNonCompileUnitScope(Scope), Ty, SizeInBits, /* AlignInBits */ 0,
-      OffsetInBits, Flags,
+      OffsetInBits, 0, Flags,
       ConstantAsMetadata::get(ConstantInt::get(IntegerType::get(VMContext, 64),
                                                StorageOffsetInBits)));
 }
@@ -293,7 +296,7 @@ DIBuilder::createStaticMemberType(DIScope *Scope, StringRef Name, DIFile *File,
   Flags |= DINode::FlagStaticMember;
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_member, Name, File,
                             LineNumber, getNonCompileUnitScope(Scope), Ty, 0,
-                            AlignInBits, 0, Flags, getConstantOrNull(Val));
+                            AlignInBits, 0, 0, Flags, getConstantOrNull(Val));
 }
 
 DIDerivedType *
@@ -303,7 +306,7 @@ DIBuilder::createObjCIVar(StringRef Name, DIFile *File, unsigned LineNumber,
                           DIType *Ty, MDNode *PropertyNode) {
   return DIDerivedType::get(VMContext, dwarf::DW_TAG_member, Name, File,
                             LineNumber, getNonCompileUnitScope(File), Ty,
-                            SizeInBits, AlignInBits, OffsetInBits, Flags,
+                            SizeInBits, AlignInBits, OffsetInBits, 0, Flags,
                             PropertyNode);
 }
 

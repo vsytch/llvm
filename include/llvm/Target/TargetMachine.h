@@ -260,7 +260,10 @@ public:
   /// Branch relaxation, which must happen after block placement, can
   /// on some targets (e.g. SystemZ) expose additional post-RA
   /// scheduling opportunities.
-  virtual bool targetSchedulesPostRAScheduling() const { return false; };
+  virtual bool targetSchedulesPostRAScheduling() const { return false; }
+
+  /// True if subtarget supports more than one address space.
+  virtual bool targetSupportsMultipleAddressSpaces() const { return false; }
 
   void getNameWithPrefix(SmallVectorImpl<char> &Name, const GlobalValue *GV,
                          Mangler &Mang, bool MayAlwaysUsePrivate = false) const;

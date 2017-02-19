@@ -76,6 +76,7 @@ LLVMMetadataRef LLVMDIBuilderCreatePointerType(LLVMDIBuilderRef D,
                                                LLVMMetadataRef PointeeType,
                                                uint64_t SizeInBits,
                                                uint32_t AlignInBits,
+                                               unsigned AddressSpace,
                                                const char *Name);
 
 LLVMMetadataRef

@@ -839,6 +839,14 @@ void DwarfUnit::constructTypeDIE(DIE &Buffer, const DIDerivedType *DTy) {
   // Add source line info if available and TyDesc is not a forward declaration.
   if (!DTy->isForwardDecl())
     addSourceLine(Buffer, DTy);
+
+  // If target supports more than one address space, then add
+  // DW_AT_address_class for pointer and reference types.
+  if (Asm->TM.targetSupportsMultipleAddressSpaces() &&
+        (Tag == dwarf::DW_TAG_pointer_type ||
+         Tag == dwarf::DW_TAG_reference_type))
+    addUInt(Buffer, dwarf::DW_AT_address_class, dwarf::DW_FORM_data4,
+            DTy->getAddressSpace());
 }
 
 void DwarfUnit::constructSubprogramArguments(DIE &Buffer, DITypeRefArray Args) {

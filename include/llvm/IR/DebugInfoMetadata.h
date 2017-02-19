@@ -686,37 +686,43 @@ class DIDerivedType : public DIType {
   friend class LLVMContextImpl;
   friend class MDNode;
 
+  /// \brief The address space of the memory pointed to or referenced by a
+  /// pointer or reference type respectively.
+  unsigned AddressSpace;
+
   DIDerivedType(LLVMContext &C, StorageType Storage, unsigned Tag,
                 unsigned Line, uint64_t SizeInBits, uint32_t AlignInBits,
-                uint64_t OffsetInBits, DIFlags Flags, ArrayRef<Metadata *> Ops)
+                uint64_t OffsetInBits, unsigned AddressSpace, DIFlags Flags,
+                ArrayRef<Metadata *> Ops)
       : DIType(C, DIDerivedTypeKind, Storage, Tag, Line, SizeInBits,
-               AlignInBits, OffsetInBits, Flags, Ops) {}
+               AlignInBits, OffsetInBits, Flags, Ops),
+        AddressSpace(AddressSpace) {}
   ~DIDerivedType() = default;
 
   static DIDerivedType *getImpl(LLVMContext &Context, unsigned Tag,
                                 StringRef Name, DIFile *File, unsigned Line,
                                 DIScopeRef Scope, DITypeRef BaseType,
                                 uint64_t SizeInBits, uint32_t AlignInBits,
-                                uint64_t OffsetInBits, DIFlags Flags,
-                                Metadata *ExtraData, StorageType Storage,
-                                bool ShouldCreate = true) {
+                                uint64_t OffsetInBits, unsigned AddressSpace,
+                                DIFlags Flags, Metadata *ExtraData,
+                                StorageType Storage, bool ShouldCreate = true) {
     return getImpl(Context, Tag, getCanonicalMDString(Context, Name), File,
                    Line, Scope, BaseType, SizeInBits, AlignInBits, OffsetInBits,
-                   Flags, ExtraData, Storage, ShouldCreate);
+                   AddressSpace, Flags, ExtraData, Storage, ShouldCreate);
   }
   static DIDerivedType *getImpl(LLVMContext &Context, unsigned Tag,
                                 MDString *Name, Metadata *File, unsigned Line,
                                 Metadata *Scope, Metadata *BaseType,
                                 uint64_t SizeInBits, uint32_t AlignInBits,
-                                uint64_t OffsetInBits, DIFlags Flags,
-                                Metadata *ExtraData, StorageType Storage,
-                                bool ShouldCreate = true);
+                                uint64_t OffsetInBits, unsigned AddressSpace,
+                                DIFlags Flags, Metadata *ExtraData,
+                                StorageType Storage, bool ShouldCreate = true);
 
   TempDIDerivedType cloneImpl() const {
     return getTemporary(getContext(), getTag(), getName(), getFile(), getLine(),
                         getScope(), getBaseType(), getSizeInBits(),
-                        getAlignInBits(), getOffsetInBits(), getFlags(),
-                        getExtraData());
+                        getAlignInBits(), getOffsetInBits(), getAddressSpace(),
+                        getFlags(), getExtraData());
   }
 
 public:
@@ -724,23 +730,28 @@ public:
                     (unsigned Tag, MDString *Name, Metadata *File,
                      unsigned Line, Metadata *Scope, Metadata *BaseType,
                      uint64_t SizeInBits, uint32_t AlignInBits,
-                     uint64_t OffsetInBits, DIFlags Flags,
-                     Metadata *ExtraData = nullptr),
+                     uint64_t OffsetInBits, unsigned AddressSpace,
+                     DIFlags Flags, Metadata *ExtraData = nullptr),
                     (Tag, Name, File, Line, Scope, BaseType, SizeInBits,
-                     AlignInBits, OffsetInBits, Flags, ExtraData))
+                     AlignInBits, OffsetInBits, AddressSpace, Flags, ExtraData))
   DEFINE_MDNODE_GET(DIDerivedType,
                     (unsigned Tag, StringRef Name, DIFile *File, unsigned Line,
                      DIScopeRef Scope, DITypeRef BaseType, uint64_t SizeInBits,
                      uint32_t AlignInBits, uint64_t OffsetInBits,
-                     DIFlags Flags, Metadata *ExtraData = nullptr),
+                     unsigned AddressSpace, DIFlags Flags,
+                     Metadata *ExtraData = nullptr),
                     (Tag, Name, File, Line, Scope, BaseType, SizeInBits,
-                     AlignInBits, OffsetInBits, Flags, ExtraData))
+                     AlignInBits, OffsetInBits, AddressSpace, Flags, ExtraData))
 
   TempDIDerivedType clone() const { return cloneImpl(); }
 
-  //// Get the base type this is derived from.
+  /// Get the base type this is derived from.
   DITypeRef getBaseType() const { return DITypeRef(getRawBaseType()); }
   Metadata *getRawBaseType() const { return getOperand(3); }
+
+  /// \returns The address space of the memory pointed to or referenced by a
+  /// pointer or reference type respectively.
+  unsigned getAddressSpace() const { return AddressSpace; }
 
   /// Get extra data associated with this derived type.
   ///
