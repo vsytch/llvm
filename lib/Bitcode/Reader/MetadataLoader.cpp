@@ -695,7 +695,7 @@ Error MetadataLoader::MetadataLoaderImpl::parseMetadata(bool ModuleLevel,
 
       unsigned AddressSpace = 0;
       if (Record.size() > 12) {
-        if (Record[12] > (uint64)std::numeric_limits<unsigned>::max())
+        if (Record[12] > (uint64_t)std::numeric_limits<unsigned>::max())
           return error("Address space value is too large");
         AddressSpace = Record[12];
       }
