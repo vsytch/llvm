@@ -216,7 +216,8 @@ static StringRef computeDataLayout(const Triple &TT) {
 
   // 32-bit private, local, and region pointers. 64-bit global, constant and
   // flat.
-  if (TT.getEnvironmentName() == "amdgiz" ||
+  if (TT.getOS() == Triple::CUDA  ||
+      TT.getEnvironmentName() == "amdgiz" ||
       TT.getEnvironmentName() == "amdgizcl" ||
       TT.getEnvironment() == Triple::HCC)
     return "e-p:64:64-p1:64:64-p2:64:64-p3:32:32-p4:64:64-p5:32:32"
