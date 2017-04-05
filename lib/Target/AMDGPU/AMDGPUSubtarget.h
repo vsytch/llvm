@@ -184,7 +184,8 @@ public:
   void ParseSubtargetFeatures(StringRef CPU, StringRef FS);
 
   bool isAmdHsaOS() const {
-    return TargetTriple.getOS() == Triple::AMDHSA;
+    return (TargetTriple.getOS() == Triple::AMDHSA) ||
+           (TargetTriple.getOS() == Triple::CUDA) ;
   }
 
   bool isMesa3DOS() const {
