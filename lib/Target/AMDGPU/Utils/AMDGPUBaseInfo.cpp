@@ -770,7 +770,7 @@ namespace AMDGPU {
 AMDGPUAS getAMDGPUAS(Triple T) {
   auto Env = T.getEnvironmentName();
   AMDGPUAS AS;
-  if (Env == "amdgiz" || Env == "amdgizcl") {
+  if (Env == "amdgiz" || Env == "amdgizcl" || (T.getOS()==Triple::CUDA)) {
     AS.FLAT_ADDRESS     = 0;
     AS.CONSTANT_ADDRESS = 4;
     AS.PRIVATE_ADDRESS  = 5;
