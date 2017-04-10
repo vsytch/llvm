@@ -182,7 +182,8 @@ class ELFAMDGPUAsmBackend : public AMDGPUAsmBackend {
 public:
   ELFAMDGPUAsmBackend(const Target &T, const Triple &TT) :
       AMDGPUAsmBackend(T), Is64Bit(TT.getArch() == Triple::amdgcn),
-      HasRelocationAddend(TT.getOS() == Triple::AMDHSA) { }
+      HasRelocationAddend((TT.getOS() == Triple::AMDHSA) ||
+         (TT.getOS() == Triple::CUDA)) { }
 
   MCObjectWriter *createObjectWriter(raw_pwrite_stream &OS) const override {
     return createAMDGPUELFObjectWriter(Is64Bit, HasRelocationAddend, OS);

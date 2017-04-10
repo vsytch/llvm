@@ -110,7 +110,8 @@ AMDGPUTargetStreamer& AMDGPUAsmPrinter::getTargetStreamer() const {
 }
 
 void AMDGPUAsmPrinter::EmitStartOfAsmFile(Module &M) {
-  if (TM.getTargetTriple().getOS() != Triple::AMDHSA)
+  if ((TM.getTargetTriple().getOS() != Triple::AMDHSA) &&
+     (TM.getTargetTriple().getOS() != Triple::CUDA))
     return;
 
   AMDGPU::IsaInfo::IsaVersion ISA =
@@ -123,7 +124,8 @@ void AMDGPUAsmPrinter::EmitStartOfAsmFile(Module &M) {
 }
 
 void AMDGPUAsmPrinter::EmitEndOfAsmFile(Module &M) {
-  if (TM.getTargetTriple().getOS() != Triple::AMDHSA)
+  if ((TM.getTargetTriple().getOS() != Triple::AMDHSA) &&
+     (TM.getTargetTriple().getOS() != Triple::CUDA))
     return;
 
   getTargetStreamer().EmitEndOfCodeObjectMetadata();
@@ -155,7 +157,8 @@ void AMDGPUAsmPrinter::EmitFunctionBodyStart() {
     getTargetStreamer().EmitAMDKernelCodeT(KernelCode);
   }
 
-  if (TM.getTargetTriple().getOS() != Triple::AMDHSA)
+  if ((TM.getTargetTriple().getOS() != Triple::AMDHSA) &&
+      (TM.getTargetTriple().getOS() != Triple::CUDA))
     return;
   getTargetStreamer().EmitKernelCodeObjectMetadata(*MF->getFunction(),
                                                    KernelCode);

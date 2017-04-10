@@ -368,7 +368,8 @@ bool isReadOnlySegment(const GlobalValue *GV, AMDGPUAS AS) {
 }
 
 bool shouldEmitConstantsToTextSection(const Triple &TT) {
-  return TT.getOS() != Triple::AMDHSA;
+  return ( (TT.getOS() != Triple::AMDHSA) && 
+           (TT.getOS() != Triple::CUDA) );
 }
 
 int getIntegerAttribute(const Function &F, StringRef Name, int Default) {

@@ -79,7 +79,7 @@ static MCTargetStreamer * createAMDGPUObjectTargetStreamer(
 static MCStreamer *createMCStreamer(const Triple &T, MCContext &Context,
                                     MCAsmBackend &MAB, raw_pwrite_stream &OS,
                                     MCCodeEmitter *Emitter, bool RelaxAll) {
-  if (T.getOS() == Triple::AMDHSA)
+  if ((T.getOS() == Triple::AMDHSA) || (T.getOS() == Triple::CUDA))
     return createAMDGPUELFStreamer(Context, MAB, OS, Emitter, RelaxAll);
 
   return createELFStreamer(Context, MAB, OS, Emitter, RelaxAll);

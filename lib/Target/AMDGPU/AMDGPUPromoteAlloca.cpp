@@ -143,7 +143,8 @@ bool AMDGPUPromoteAlloca::doInitialization(Module &M) {
   const Triple &TT = TM->getTargetTriple();
 
   IsAMDGCN = TT.getArch() == Triple::amdgcn;
-  IsAMDHSA = TT.getOS() == Triple::AMDHSA;
+  IsAMDHSA = (TT.getOS() == Triple::AMDHSA) ||
+             (TT.getOS() == Triple::CUDA);
 
   return false;
 }
