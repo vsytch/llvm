@@ -24,11 +24,13 @@ using namespace llvm;
 
 namespace {
 
+// New AMDGCN generic now is AS0 (previously AS4)
 enum AddressSpace {
-  ADDRESS_SPACE_GENERIC = 4,
+  ADDRESS_SPACE_GENERIC = 0,
   ADDRESS_SPACE_GLOBAL = 1,
   ADDRESS_SPACE_SHARED = 3,
-  ADDRESS_SPACE_CONST = 2,
+  ADDRESS_SPACE_CONST = 4,
+  ADDRESS_SPACE_PRIVATE = 5,
 
   ADDRESS_SPACE_PARAM = 101
 };
@@ -39,11 +41,11 @@ using IRBuilderTy = llvm::IRBuilder<>;
 // Invalid addrspacecast between non-generic is not allowed in AMDGCN
 //
 // This cast
-//   %1 = addrspacecast i32 addrspace(1)* %0 to i32*
+//   %1 = addrspacecast i32 addrspace(1)* %0 to i32 addrspace(5)*
 //
 // will be transformed to two casts
-//   %1 = addrspacecast i32 addrspace(1)* %0 to i32 addrespace(4)*
-//   %2 = addrspacecast i32 addrspace(4)* %1 to i32*
+//   %1 = addrspacecast i32 addrspace(1)* %0 to i32*
+//   %2 = addrspacecast i32* %1 to i32 addrspace(5)*
 //
 class SugarAddrSpaceCast : public FunctionPass {
 
