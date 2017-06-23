@@ -546,10 +546,14 @@ inlineCallsImpl(CallGraphSCC &SCC, CallGraph &CG,
       // just become a regular analysis dependency.
       OptimizationRemarkEmitter ORE(Caller);
 
-      // If the policy determines that we should inline this function,
-      // delete the call instead.
-      if (!shouldInline(CS, GetInlineCost, ORE))
-        continue;
+      // For AMDGPU target we always inline
+      if (CG.getModule().getTargetTriple().find("amdgcn--amdhsa") != std::string::npos) {
+      } else {
+        // If the policy determines that we should inline this function,
+        // delete the call instead.
+        if (!shouldInline(CS, GetInlineCost, ORE))
+          continue;
+      }
 
       // If this call site is dead and it is to a readonly function, we should
       // just delete the call instead of trying to inline it, regardless of
@@ -874,9 +878,13 @@ PreservedAnalyses InlinerPass::run(LazyCallGraph::SCC &InitialC,
           InlineHistoryIncludes(&Callee, InlineHistoryID, InlineHistory))
         continue;
 
-      // Check whether we want to inline this callsite.
-      if (!shouldInline(CS, GetInlineCost, ORE))
-        continue;
+      // For AMDGPU target we always inline
+      if (M.getTargetTriple().find("amdgcn--amdhsa") != std::string::npos) {
+      } else {
+        // Check whether we want to inline this callsite.
+        if (!shouldInline(CS, GetInlineCost, ORE))
+          continue;
+      }
 
       // Setup the data structure used to plumb customization into the
       // `InlineFunction` routine.
