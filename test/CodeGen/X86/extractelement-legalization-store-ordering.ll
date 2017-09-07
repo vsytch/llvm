@@ -15,6 +15,7 @@ define void @test_extractelement_legalization_storereuse(<4 x i32> %a, i32* noca
 ; CHECK-NEXT:    pushl %esi
 ; CHECK-NEXT:    movl {{[0-9]+}}(%esp), %eax
 ; CHECK-NEXT:    movl {{[0-9]+}}(%esp), %ecx
+<<<<<<< HEAD
 ; CHECK-NEXT:    movl {{[0-9]+}}(%esp), %edx
 ; CHECK-NEXT:    paddd (%edx), %xmm0
 ; CHECK-NEXT:    movdqa %xmm0, (%edx)
@@ -27,6 +28,20 @@ define void @test_extractelement_legalization_storereuse(<4 x i32> %a, i32* noca
 ; CHECK-NEXT:    movl %edi, (%eax,%ecx)
 ; CHECK-NEXT:    movl %ebx, 8(%eax,%ecx)
 ; CHECK-NEXT:    movl %edx, 4(%eax,%ecx)
+=======
+; CHECK-NEXT:    paddd (%ecx), %xmm0
+; CHECK-NEXT:    movl {{[0-9]+}}(%esp), %edx
+; CHECK-NEXT:    movdqa %xmm0, (%ecx)
+; CHECK-NEXT:    movl (%ecx), %esi
+; CHECK-NEXT:    movl 4(%ecx), %edi
+; CHECK-NEXT:    shll $4, %edx
+; CHECK-NEXT:    movl 8(%ecx), %ebx
+; CHECK-NEXT:    movl 12(%ecx), %ecx
+; CHECK-NEXT:    movl %esi, 12(%eax,%edx)
+; CHECK-NEXT:    movl %edi, (%eax,%edx)
+; CHECK-NEXT:    movl %ebx, 8(%eax,%edx)
+; CHECK-NEXT:    movl %ecx, 4(%eax,%edx)
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK-NEXT:    popl %esi
 ; CHECK-NEXT:    popl %edi
 ; CHECK-NEXT:    popl %ebx

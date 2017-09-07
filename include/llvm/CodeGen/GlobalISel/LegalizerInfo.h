@@ -162,6 +162,12 @@ public:
   /// on Ty until we find a legal type for this operation.
   Optional<LLT> findLegalizableSize(const InstrAspect &Aspect,
                                     function_ref<LLT(LLT)> NextType) const {
+<<<<<<< HEAD
+=======
+    if (Aspect.Idx >= Actions[Aspect.Opcode - FirstOp].size())
+      return None;
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     LegalizeAction Action;
     const TypeMap &Map = Actions[Aspect.Opcode - FirstOp][Aspect.Idx];
     LLT Ty = Aspect.Type;

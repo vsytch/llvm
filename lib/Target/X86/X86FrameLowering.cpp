@@ -972,7 +972,10 @@ void X86FrameLowering::emitPrologue(MachineFunction &MF,
     X86FI->setCalleeSavedFrameSize(
       X86FI->getCalleeSavedFrameSize() - TailCallReturnAddrDelta);
 
+<<<<<<< HEAD
   bool UseRedZone = false;
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   bool UseStackProbe = !STI.getTargetLowering()->getStackProbeSymbolName(MF).empty();
 
   // The default stack probe size is 4096 if the function has no stackprobesize
@@ -1189,7 +1192,12 @@ void X86FrameLowering::emitPrologue(MachineFunction &MF,
   if (IsWin64Prologue && !IsFunclet && TRI->needsStackRealignment(MF))
     AlignedNumBytes = alignTo(AlignedNumBytes, MaxAlign);
   if (AlignedNumBytes >= StackProbeSize && UseStackProbe) {
+<<<<<<< HEAD
     assert(!UseRedZone && "The Red Zone is not accounted for in stack probes");
+=======
+    assert(!X86FI->getUsesRedZone() &&
+           "The Red Zone is not accounted for in stack probes");
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
     // Check whether EAX is livein for this block.
     bool isEAXAlive = isEAXLiveIn(MBB);
@@ -2000,7 +2008,7 @@ bool X86FrameLowering::spillCalleeSavedRegisters(
 
 bool X86FrameLowering::restoreCalleeSavedRegisters(MachineBasicBlock &MBB,
                                                MachineBasicBlock::iterator MI,
-                                        const std::vector<CalleeSavedInfo> &CSI,
+                                          std::vector<CalleeSavedInfo> &CSI,
                                           const TargetRegisterInfo *TRI) const {
   if (CSI.empty())
     return false;

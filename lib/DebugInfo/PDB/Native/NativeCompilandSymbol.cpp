@@ -15,7 +15,11 @@ namespace llvm {
 namespace pdb {
 
 NativeCompilandSymbol::NativeCompilandSymbol(NativeSession &Session,
+<<<<<<< HEAD
                                              uint32_t SymbolId,
+=======
+                                             SymIndexId SymbolId,
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
                                              DbiModuleDescriptor MI)
     : NativeRawSymbol(Session, SymbolId), Module(MI) {}
 

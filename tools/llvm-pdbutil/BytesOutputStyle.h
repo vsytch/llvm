@@ -12,6 +12,10 @@
 
 #include "LinePrinter.h"
 #include "OutputStyle.h"
+<<<<<<< HEAD
+=======
+#include "StreamUtil.h"
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 #include "llvm/Support/Error.h"
 
@@ -35,6 +39,10 @@ private:
   void dumpNameMap();
   void dumpBlockRanges(uint32_t Min, uint32_t Max);
   void dumpByteRanges(uint32_t Min, uint32_t Max);
+<<<<<<< HEAD
+=======
+  void dumpFpm();
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   void dumpStreamBytes();
 
   void dumpSectionContributions();
@@ -59,7 +67,11 @@ private:
   PDBFile &File;
   LinePrinter P;
   ExitOnError Err;
+<<<<<<< HEAD
   SmallVector<std::string, 8> StreamPurposes;
+=======
+  SmallVector<StreamInfo, 8> StreamPurposes;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 };
 } // namespace pdb
 } // namespace llvm

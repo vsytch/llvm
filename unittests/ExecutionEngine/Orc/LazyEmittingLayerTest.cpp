@@ -27,7 +27,11 @@ struct MockBaseLayer {
 TEST(LazyEmittingLayerTest, Empty) {
   MockBaseLayer M;
   llvm::orc::LazyEmittingLayer<MockBaseLayer> L(M);
+<<<<<<< HEAD
   L.addModule(std::unique_ptr<llvm::Module>(), nullptr);
+=======
+  cantFail(L.addModule(std::unique_ptr<llvm::Module>(), nullptr));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 }
 
 }

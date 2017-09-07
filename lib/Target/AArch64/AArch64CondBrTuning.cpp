@@ -167,6 +167,10 @@ bool AArch64CondBrTuning::tryToTuneBranch(MachineInstr &MI,
   case AArch64::SUBWrs:
   case AArch64::SUBWrx:
     IsFlagSetting = false;
+<<<<<<< HEAD
+=======
+    LLVM_FALLTHROUGH;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   case AArch64::ADDSWri:
   case AArch64::ADDSWrr:
   case AArch64::ADDSWrs:
@@ -226,6 +230,10 @@ bool AArch64CondBrTuning::tryToTuneBranch(MachineInstr &MI,
   case AArch64::SUBXrs:
   case AArch64::SUBXrx:
     IsFlagSetting = false;
+<<<<<<< HEAD
+=======
+    LLVM_FALLTHROUGH;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   case AArch64::ADDSXri:
   case AArch64::ADDSXrr:
   case AArch64::ADDSXrs:

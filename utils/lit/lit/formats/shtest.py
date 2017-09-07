@@ -5,6 +5,7 @@ import os
 import lit.Test
 import lit.TestRunner
 import lit.util
+<<<<<<< HEAD
 from .base import TestFormat
 
 class ShTest(TestFormat):
@@ -30,6 +31,24 @@ class ShTest(TestFormat):
             execute_external: (optional) If true, use shell subprocesses instead
                 of lit's internal pipeline logic.
         """
+=======
+
+from .base import FileBasedTest
+
+
+class ShTest(FileBasedTest):
+    """ShTest is a format with one file per test.
+
+    This is the primary format for regression tests as described in the LLVM
+    testing guide:
+
+        http://llvm.org/docs/TestingGuide.html
+
+    The ShTest files contain some number of shell-like command pipelines, along
+    with assertions about what should be in the output.
+    """
+    def __init__(self, execute_external=False):
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
         self.execute_external = execute_external
 
     def getTestsInDirectory(self, testSuite, path_in_suite,

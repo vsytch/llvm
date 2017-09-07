@@ -63,6 +63,7 @@ public:
   BitVector getReservedRegs(const MachineFunction &MF) const override;
 
   const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
+  const MCPhysReg *getCalleeSavedRegsViaCopy(const MachineFunction *MF) const;
   const uint32_t *getCallPreservedMask(const MachineFunction &MF,
                                        CallingConv::ID) const override;
 
@@ -185,6 +186,7 @@ public:
            OpType <= AMDGPU::OPERAND_SRC_LAST;
   }
 
+<<<<<<< HEAD
   enum PreloadedValue {
     // SGPRS:
     PRIVATE_SEGMENT_BUFFER = 0,
@@ -210,6 +212,8 @@ public:
   unsigned getPreloadedValue(const MachineFunction &MF,
                              enum PreloadedValue Value) const;
 
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   unsigned findUnusedRegister(const MachineRegisterInfo &MRI,
                               const TargetRegisterClass *RC,
                               const MachineFunction &MF) const;

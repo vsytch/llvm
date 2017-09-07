@@ -59,9 +59,13 @@ entry:
 ; CHECK-LABEL: f123:
 ; MIPS64R2: daddiu  $[[R0:[0-9]+]], $zero, 123
 ; MIPS64R2: dins    $[[R0:[0-9]+]], $[[R1:[0-9]+]], 27, 37
+<<<<<<< HEAD
 ; MIPS64R2: daddiu  $[[R0:[0-9]+]], $zero, 5
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; MIPS64R2: daddiu  $[[R0:[0-9]+]], $zero, 4
 ; MIPS64R2: dins    $[[R0:[0-9]+]], $[[R1:[0-9]+]], 28, 6
+; MIPS64R2: daddiu  $[[R0:[0-9]+]], $zero, 5
 ; MIPS64R2: dins    $[[R0:[0-9]+]], $[[R1:[0-9]+]], 50, 14
 ; MIPS64R2: dsrl    $[[R0:[0-9]+]], $[[R1:[0-9]+]], 50
 ; MIPS64R2: dins    $[[R0:[0-9]+]], $[[R1:[0-9]+]], 34, 16
@@ -94,4 +98,8 @@ entry:
 ; MIPS32R2:        ori  $[[R0:[0-9]+]], $[[R0:[0-9]+]], 8
 ; MIPS32R2-NOT:    ins {{[[:space:]].*}}
 ; MIPS64R2N32:     ori  $[[R0:[0-9]+]], $[[R0:[0-9]+]], 8
+<<<<<<< HEAD
 ; MIPS64R2N32-NOT: ins {{[[:space:]].*}}
+=======
+; MIPS64R2N32-NOT: ins {{[[:space:]].*}}
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0

@@ -15,15 +15,16 @@
 #ifndef LLVM_TOOLS_LLI_ORCLAZYJIT_H
 #define LLVM_TOOLS_LLI_ORCLAZYJIT_H
 
+#include "llvm/ADT/Optional.h"
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/ExecutionEngine/JITSymbol.h"
 #include "llvm/ExecutionEngine/Orc/CompileOnDemandLayer.h"
 #include "llvm/ExecutionEngine/Orc/CompileUtils.h"
 #include "llvm/ExecutionEngine/Orc/ExecutionUtils.h"
-#include "llvm/ExecutionEngine/Orc/IndirectionUtils.h"
 #include "llvm/ExecutionEngine/Orc/IRCompileLayer.h"
 #include "llvm/ExecutionEngine/Orc/IRTransformLayer.h"
+#include "llvm/ExecutionEngine/Orc/IndirectionUtils.h"
 #include "llvm/ExecutionEngine/Orc/LambdaResolver.h"
 #include "llvm/ExecutionEngine/Orc/RTDyldObjectLinkingLayer.h"
 #include "llvm/ExecutionEngine/RTDyldMemoryManager.h"
@@ -61,8 +62,13 @@ public:
              IndirectStubsManagerBuilder IndirectStubsMgrBuilder,
              bool InlineStubs)
       : TM(std::move(TM)), DL(this->TM->createDataLayout()),
+<<<<<<< HEAD
 	CCMgr(std::move(CCMgr)),
 	ObjectLayer([]() { return std::make_shared<SectionMemoryManager>(); }),
+=======
+        CCMgr(std::move(CCMgr)),
+        ObjectLayer([]() { return std::make_shared<SectionMemoryManager>(); }),
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
         CompileLayer(ObjectLayer, orc::SimpleCompiler(*this->TM)),
         IRDumpLayer(CompileLayer, createDebugDumper()),
         CODLayer(IRDumpLayer, extractSingleFunction, *this->CCMgr,
@@ -75,10 +81,18 @@ public:
     CXXRuntimeOverrides.runDestructors();
     // Run any IR destructors.
     for (auto &DtorRunner : IRStaticDestructorRunners)
-      DtorRunner.runViaLayer(CODLayer);
+      if (auto Err = DtorRunner.runViaLayer(CODLayer)) {
+        // FIXME: OrcLazyJIT should probably take a "shutdownError" callback to
+        //        report these errors on.
+        report_fatal_error(std::move(Err));
+      }
   }
 
+<<<<<<< HEAD
   void addModule(std::shared_ptr<Module> M) {
+=======
+  Error addModule(std::shared_ptr<Module> M) {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     if (M->getDataLayout().isDefault())
       M->setDataLayout(DL);
 
@@ -108,7 +122,11 @@ public:
     //   1) Search the JIT symbols.
     //   2) Check for C++ runtime overrides.
     //   3) Search the host process (LLI)'s symbol table.
+<<<<<<< HEAD
     if (ModulesHandle == CODLayerT::ModuleHandleT()) {
+=======
+    if (!ModulesHandle) {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
       auto Resolver =
         orc::createLambdaResolver(
           [this](const std::string &Name) -> JITSymbol {
@@ -125,19 +143,41 @@ public:
         );
 
       // Add the module to the JIT.
+<<<<<<< HEAD
       ModulesHandle =
         CODLayer.addModule(std::move(M), std::move(Resolver));
     } else
       CODLayer.addExtraModule(ModulesHandle, std::move(M));
+=======
+      if (auto ModulesHandleOrErr =
+          CODLayer.addModule(std::move(M), std::move(Resolver)))
+        ModulesHandle = std::move(*ModulesHandleOrErr);
+      else
+        return ModulesHandleOrErr.takeError();
+
+    } else if (auto Err = CODLayer.addExtraModule(*ModulesHandle, std::move(M)))
+      return Err;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
     // Run the static constructors, and save the static destructor runner for
     // execution when the JIT is torn down.
     orc::CtorDtorRunner<CODLayerT> CtorRunner(std::move(CtorNames),
+<<<<<<< HEAD
                                               ModulesHandle);
     CtorRunner.runViaLayer(CODLayer);
 
     IRStaticDestructorRunners.emplace_back(std::move(DtorNames),
                                            ModulesHandle);
+=======
+                                              *ModulesHandle);
+    if (auto Err = CtorRunner.runViaLayer(CODLayer))
+      return Err;
+
+    IRStaticDestructorRunners.emplace_back(std::move(DtorNames),
+                                           *ModulesHandle);
+
+    return Error::success();
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   JITSymbol findSymbol(const std::string &Name) {
@@ -178,7 +218,11 @@ private:
 
   orc::LocalCXXRuntimeOverrides CXXRuntimeOverrides;
   std::vector<orc::CtorDtorRunner<CODLayerT>> IRStaticDestructorRunners;
+<<<<<<< HEAD
   CODLayerT::ModuleHandleT ModulesHandle;
+=======
+  llvm::Optional<CODLayerT::ModuleHandleT> ModulesHandle;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 };
 
 int runOrcLazyJIT(std::vector<std::unique_ptr<Module>> Ms,

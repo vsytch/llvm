@@ -653,16 +653,18 @@ MCAssembler::handleFixup(const MCAsmLayout &Layout, MCFragment &F,
   // Evaluate the fixup.
   MCValue Target;
   uint64_t FixedValue;
-  bool IsPCRel = Backend.getFixupKindInfo(Fixup.getKind()).Flags &
-                 MCFixupKindInfo::FKF_IsPCRel;
-  if (!evaluateFixup(Layout, Fixup, &F, Target, FixedValue)) {
+  bool IsResolved = evaluateFixup(Layout, Fixup, &F, Target, FixedValue);
+  if (!IsResolved) {
     // The fixup was unresolved, we need a relocation. Inform the object
     // writer of the relocation, and give it an opportunity to adjust the
     // fixup value if need be.
-    getWriter().recordRelocation(*this, Layout, &F, Fixup, Target, IsPCRel,
-                                 FixedValue);
+    getWriter().recordRelocation(*this, Layout, &F, Fixup, Target, FixedValue);
   }
+<<<<<<< HEAD
   return std::make_tuple(Target, FixedValue, IsPCRel);
+=======
+  return std::make_tuple(Target, FixedValue, IsResolved);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 }
 
 void MCAssembler::layout(MCAsmLayout &Layout) {
@@ -738,12 +740,21 @@ void MCAssembler::layout(MCAsmLayout &Layout) {
         llvm_unreachable("Unknown fragment with fixups!");
       for (const MCFixup &Fixup : Fixups) {
         uint64_t FixedValue;
+<<<<<<< HEAD
         bool IsPCRel;
         MCValue Target;
         std::tie(Target, FixedValue, IsPCRel) =
             handleFixup(Layout, Frag, Fixup);
         getBackend().applyFixup(*this, Fixup, Target, Contents, FixedValue,
                                 IsPCRel);
+=======
+        bool IsResolved;
+        MCValue Target;
+        std::tie(Target, FixedValue, IsResolved) =
+            handleFixup(Layout, Frag, Fixup);
+        getBackend().applyFixup(*this, Fixup, Target, Contents, FixedValue,
+                                IsResolved);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
       }
     }
   }

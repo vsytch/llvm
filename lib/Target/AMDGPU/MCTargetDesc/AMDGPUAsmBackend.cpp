@@ -32,7 +32,11 @@ public:
 
   void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
+<<<<<<< HEAD
                   uint64_t Value, bool IsPCRel) const override;
+=======
+                  uint64_t Value, bool IsResolved) const override;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   bool fixupNeedsRelaxation(const MCFixup &Fixup, uint64_t Value,
                             const MCRelaxableFragment *DF,
                             const MCAsmLayout &Layout) const override {
@@ -43,6 +47,8 @@ public:
     llvm_unreachable("Not implemented");
   }
   bool mayNeedRelaxation(const MCInst &Inst) const override { return false; }
+
+  unsigned getMinimumNopSize() const override;
   bool writeNopData(uint64_t Count, MCObjectWriter *OW) const override;
 
   const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override;
@@ -76,7 +82,7 @@ static uint64_t adjustFixupValue(const MCFixup &Fixup, uint64_t Value,
                                  MCContext *Ctx) {
   int64_t SignedValue = static_cast<int64_t>(Value);
 
-  switch (Fixup.getKind()) {
+  switch (static_cast<unsigned>(Fixup.getKind())) {
   case AMDGPU::fixup_si_sopp_br: {
     int64_t BrImm = (SignedValue - 4) / 4;
 
@@ -100,7 +106,11 @@ static uint64_t adjustFixupValue(const MCFixup &Fixup, uint64_t Value,
 void AMDGPUAsmBackend::applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                                   const MCValue &Target,
                                   MutableArrayRef<char> Data, uint64_t Value,
+<<<<<<< HEAD
                                   bool IsPCRel) const {
+=======
+                                  bool IsResolved) const {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   Value = adjustFixupValue(Fixup, Value, &Asm.getContext());
   if (!Value)
     return; // Doesn't change encoding.
@@ -131,6 +141,10 @@ const MCFixupKindInfo &AMDGPUAsmBackend::getFixupKindInfo(
     return MCAsmBackend::getFixupKindInfo(Kind);
 
   return Infos[Kind - FirstTargetFixupKind];
+}
+
+unsigned AMDGPUAsmBackend::getMinimumNopSize() const {
+  return 4;
 }
 
 bool AMDGPUAsmBackend::writeNopData(uint64_t Count, MCObjectWriter *OW) const {

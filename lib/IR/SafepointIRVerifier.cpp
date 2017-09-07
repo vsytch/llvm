@@ -26,8 +26,13 @@
 //
 // Because it is valid to reorder 'c' above the safepoint, this is legal.  In
 // practice, this is a somewhat uncommon transform, but CodeGenPrep does create
+<<<<<<< HEAD
 // idioms like this.  Today, the verifier would report a spurious failure on
 // this case.
+=======
+// idioms like this.  The verifier knows about these cases and avoids reporting
+// false positives.
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 //
 //===----------------------------------------------------------------------===//
 
@@ -60,6 +65,10 @@ static cl::opt<bool> PrintOnly("safepoint-ir-verifier-print-only",
 
 static void Verify(const Function &F, const DominatorTree &DT);
 
+<<<<<<< HEAD
+=======
+namespace {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 struct SafepointIRVerifier : public FunctionPass {
   static char ID; // Pass identification, replacement for typeid
   DominatorTree DT;
@@ -79,6 +88,10 @@ struct SafepointIRVerifier : public FunctionPass {
 
   StringRef getPassName() const override { return "safepoint verifier"; }
 };
+<<<<<<< HEAD
+=======
+} // namespace
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 void llvm::verifySafepointIR(Function &F) {
   SafepointIRVerifier pass;
@@ -220,6 +233,7 @@ static void TransferBlock(const BasicBlock *BB,
         dbgs() << "\n";);
 }
 
+<<<<<<< HEAD
 /// Return true if V is exclusively derived off a constant base, i.e. all
 /// operands of non-unary operators (phi/select) are derived off a constant
 /// base.
@@ -258,6 +272,77 @@ isExclusivelyConstantDerivedRecursive(const Value *V,
 static bool isExclusivelyConstantDerived(const Value *V) {
   DenseSet<const Value*> Visited;
   return isExclusivelyConstantDerivedRecursive(V, Visited);
+=======
+/// A given derived pointer can have multiple base pointers through phi/selects.
+/// This type indicates when the base pointer is exclusively constant
+/// (ExclusivelySomeConstant), and if that constant is proven to be exclusively
+/// null, we record that as ExclusivelyNull. In all other cases, the BaseType is
+/// NonConstant.
+enum BaseType {
+  NonConstant = 1, // Base pointers is not exclusively constant.
+  ExclusivelyNull,
+  ExclusivelySomeConstant // Base pointers for a given derived pointer is from a
+                          // set of constants, but they are not exclusively
+                          // null.
+};
+
+/// Return the baseType for Val which states whether Val is exclusively
+/// derived from constant/null, or not exclusively derived from constant.
+/// Val is exclusively derived off a constant base when all operands of phi and
+/// selects are derived off a constant base.
+static enum BaseType getBaseType(const Value *Val) {
+
+  SmallVector<const Value *, 32> Worklist;
+  DenseSet<const Value *> Visited;
+  bool isExclusivelyDerivedFromNull = true;
+  Worklist.push_back(Val);
+  // Strip through all the bitcasts and geps to get base pointer. Also check for
+  // the exclusive value when there can be multiple base pointers (through phis
+  // or selects).
+  while(!Worklist.empty()) {
+    const Value *V = Worklist.pop_back_val();
+    if (!Visited.insert(V).second)
+      continue;
+
+    if (const auto *CI = dyn_cast<CastInst>(V)) {
+      Worklist.push_back(CI->stripPointerCasts());
+      continue;
+    }
+    if (const auto *GEP = dyn_cast<GetElementPtrInst>(V)) {
+      Worklist.push_back(GEP->getPointerOperand());
+      continue;
+    }
+    // Push all the incoming values of phi node into the worklist for
+    // processing.
+    if (const auto *PN = dyn_cast<PHINode>(V)) {
+      for (Value *InV: PN->incoming_values())
+        Worklist.push_back(InV);
+      continue;
+    }
+    if (const auto *SI = dyn_cast<SelectInst>(V)) {
+      // Push in the true and false values
+      Worklist.push_back(SI->getTrueValue());
+      Worklist.push_back(SI->getFalseValue());
+      continue;
+    }
+    if (isa<Constant>(V)) {
+      // We found at least one base pointer which is non-null, so this derived
+      // pointer is not exclusively derived from null.
+      if (V != Constant::getNullValue(V->getType()))
+        isExclusivelyDerivedFromNull = false;
+      // Continue processing the remaining values to make sure it's exclusively
+      // constant.
+      continue;
+    }
+    // At this point, we know that the base pointer is not exclusively
+    // constant.
+    return BaseType::NonConstant;
+  }
+  // Now, we know that the base pointer is exclusively constant, but we need to
+  // differentiate between exclusive null constant and non-null constant.
+  return isExclusivelyDerivedFromNull ? BaseType::ExclusivelyNull
+                                      : BaseType::ExclusivelySomeConstant;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 }
 
 static void Verify(const Function &F, const DominatorTree &DT) {
@@ -323,6 +408,13 @@ static void Verify(const Function &F, const DominatorTree &DT) {
     AnyInvalidUses = true;
   };
 
+<<<<<<< HEAD
+=======
+  auto isNotExclusivelyConstantDerived = [](const Value *V) {
+    return getBaseType(V) == BaseType::NonConstant;
+  };
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   for (const BasicBlock &BB : F) {
     // We destructively modify AvailableIn as we traverse the block instruction
     // by instruction.
@@ -334,6 +426,7 @@ static void Verify(const Function &F, const DominatorTree &DT) {
             const BasicBlock *InBB = PN->getIncomingBlock(i);
             const Value *InValue = PN->getIncomingValue(i);
 
+<<<<<<< HEAD
             if (!isExclusivelyConstantDerived(InValue) &&
                 !BlockMap[InBB]->AvailableOut.count(InValue))
               ReportInvalidUse(*InValue, *PN);
@@ -342,6 +435,60 @@ static void Verify(const Function &F, const DominatorTree &DT) {
         for (const Value *V : I.operands())
           if (containsGCPtrType(V->getType()) &&
               !isExclusivelyConstantDerived(V) && !AvailableSet.count(V))
+=======
+            if (isNotExclusivelyConstantDerived(InValue) &&
+                !BlockMap[InBB]->AvailableOut.count(InValue))
+              ReportInvalidUse(*InValue, *PN);
+          }
+      } else if (isa<CmpInst>(I) &&
+                 containsGCPtrType(I.getOperand(0)->getType())) {
+        Value *LHS = I.getOperand(0), *RHS = I.getOperand(1);
+        enum BaseType baseTyLHS = getBaseType(LHS),
+                      baseTyRHS = getBaseType(RHS);
+
+        // Returns true if LHS and RHS are unrelocated pointers and they are
+        // valid unrelocated uses.
+        auto hasValidUnrelocatedUse = [&AvailableSet, baseTyLHS, baseTyRHS, &LHS, &RHS] () {
+            // A cmp instruction has valid unrelocated pointer operands only if
+            // both operands are unrelocated pointers.
+            // In the comparison between two pointers, if one is an unrelocated
+            // use, the other *should be* an unrelocated use, for this
+            // instruction to contain valid unrelocated uses. This unrelocated
+            // use can be a null constant as well, or another unrelocated
+            // pointer.
+            if (AvailableSet.count(LHS) || AvailableSet.count(RHS))
+              return false;
+            // Constant pointers (that are not exclusively null) may have
+            // meaning in different VMs, so we cannot reorder the compare
+            // against constant pointers before the safepoint. In other words,
+            // comparison of an unrelocated use against a non-null constant
+            // maybe invalid.
+            if ((baseTyLHS == BaseType::ExclusivelySomeConstant &&
+                 baseTyRHS == BaseType::NonConstant) ||
+                (baseTyLHS == BaseType::NonConstant &&
+                 baseTyRHS == BaseType::ExclusivelySomeConstant))
+              return false;
+            // All other cases are valid cases enumerated below:
+            // 1. Comparison between an exlusively derived null pointer and a
+            // constant base pointer.
+            // 2. Comparison between an exlusively derived null pointer and a
+            // non-constant unrelocated base pointer.
+            // 3. Comparison between 2 unrelocated pointers.
+            return true;
+        };
+        if (!hasValidUnrelocatedUse()) {
+          // Print out all non-constant derived pointers that are unrelocated
+          // uses, which are invalid.
+          if (baseTyLHS == BaseType::NonConstant && !AvailableSet.count(LHS))
+            ReportInvalidUse(*LHS, I);
+          if (baseTyRHS == BaseType::NonConstant && !AvailableSet.count(RHS))
+            ReportInvalidUse(*RHS, I);
+        }
+      } else {
+        for (const Value *V : I.operands())
+          if (containsGCPtrType(V->getType()) &&
+              isNotExclusivelyConstantDerived(V) && !AvailableSet.count(V))
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
             ReportInvalidUse(*V, I);
       }
 

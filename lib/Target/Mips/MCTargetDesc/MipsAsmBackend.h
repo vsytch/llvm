@@ -23,24 +23,28 @@ namespace llvm {
 
 class MCAssembler;
 struct MCFixupKindInfo;
-class Target;
 class MCObjectWriter;
+class MCRegisterInfo;
+class Target;
 
 class MipsAsmBackend : public MCAsmBackend {
-  Triple::OSType OSType;
+  Triple TheTriple;
   bool IsLittle; // Big or little endian
-  bool Is64Bit;  // 32 or 64 bit words
 
 public:
-  MipsAsmBackend(const Target &T, Triple::OSType OSType, bool IsLittle,
-                 bool Is64Bit)
-      : MCAsmBackend(), OSType(OSType), IsLittle(IsLittle), Is64Bit(Is64Bit) {}
+  MipsAsmBackend(const Target &T, const MCRegisterInfo &MRI, const Triple &TT,
+                 StringRef CPU)
+      : TheTriple(TT), IsLittle(TT.isLittleEndian()) {}
 
   MCObjectWriter *createObjectWriter(raw_pwrite_stream &OS) const override;
 
   void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
+<<<<<<< HEAD
                   uint64_t Value, bool IsPCRel) const override;
+=======
+                  uint64_t Value, bool IsResolved) const override;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   Optional<MCFixupKind> getFixupKind(StringRef Name) const override;
   const MCFixupKindInfo &getFixupKindInfo(MCFixupKind Kind) const override;

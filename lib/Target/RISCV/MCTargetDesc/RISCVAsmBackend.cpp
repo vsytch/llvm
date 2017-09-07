@@ -34,7 +34,11 @@ public:
 
   void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
+<<<<<<< HEAD
                   uint64_t Value, bool IsPCRel) const override;
+=======
+                  uint64_t Value, bool IsResolved) const override;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   MCObjectWriter *createObjectWriter(raw_pwrite_stream &OS) const override;
 
@@ -51,7 +55,7 @@ public:
   void relaxInstruction(const MCInst &Inst, const MCSubtargetInfo &STI,
                         MCInst &Res) const override {
 
-    llvm_unreachable("RISCVAsmBackend::relaxInstruction() unimplemented");
+    report_fatal_error("RISCVAsmBackend::relaxInstruction() unimplemented");
   }
 
   bool writeNopData(uint64_t Count, MCObjectWriter *OW) const override;
@@ -73,7 +77,11 @@ bool RISCVAsmBackend::writeNopData(uint64_t Count, MCObjectWriter *OW) const {
 void RISCVAsmBackend::applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                                  const MCValue &Target,
                                  MutableArrayRef<char> Data, uint64_t Value,
+<<<<<<< HEAD
                                  bool IsPCRel) const {
+=======
+                                 bool IsResolved) const {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   return;
 }
 

@@ -61,6 +61,7 @@ bool BasicBlockEdge::isSingleEdge() const {
 //===----------------------------------------------------------------------===//
 
 template class llvm::DomTreeNodeBase<BasicBlock>;
+<<<<<<< HEAD
 template class llvm::DominatorTreeBase<BasicBlock>;
 
 template void llvm::DomTreeBuilder::Calculate<Function, BasicBlock *>(
@@ -79,6 +80,37 @@ template bool llvm::DomTreeBuilder::Verify<BasicBlock *>(
 template bool llvm::DomTreeBuilder::Verify<Inverse<BasicBlock *>>(
     const DominatorTreeBase<typename std::remove_pointer<
         GraphTraits<Inverse<BasicBlock *>>::NodeRef>::type> &DT);
+=======
+template class llvm::DominatorTreeBase<BasicBlock, false>; // DomTreeBase
+template class llvm::DominatorTreeBase<BasicBlock, true>; // PostDomTreeBase
+
+template struct llvm::DomTreeBuilder::Update<BasicBlock *>;
+
+template void llvm::DomTreeBuilder::Calculate<DomTreeBuilder::BBDomTree>(
+    DomTreeBuilder::BBDomTree &DT);
+template void llvm::DomTreeBuilder::Calculate<DomTreeBuilder::BBPostDomTree>(
+    DomTreeBuilder::BBPostDomTree &DT);
+
+template void llvm::DomTreeBuilder::InsertEdge<DomTreeBuilder::BBDomTree>(
+    DomTreeBuilder::BBDomTree &DT, BasicBlock *From, BasicBlock *To);
+template void llvm::DomTreeBuilder::InsertEdge<DomTreeBuilder::BBPostDomTree>(
+    DomTreeBuilder::BBPostDomTree &DT, BasicBlock *From, BasicBlock *To);
+
+template void llvm::DomTreeBuilder::DeleteEdge<DomTreeBuilder::BBDomTree>(
+    DomTreeBuilder::BBDomTree &DT, BasicBlock *From, BasicBlock *To);
+template void llvm::DomTreeBuilder::DeleteEdge<DomTreeBuilder::BBPostDomTree>(
+    DomTreeBuilder::BBPostDomTree &DT, BasicBlock *From, BasicBlock *To);
+
+template void llvm::DomTreeBuilder::ApplyUpdates<DomTreeBuilder::BBDomTree>(
+    DomTreeBuilder::BBDomTree &DT, DomTreeBuilder::BBUpdates);
+template void llvm::DomTreeBuilder::ApplyUpdates<DomTreeBuilder::BBPostDomTree>(
+    DomTreeBuilder::BBPostDomTree &DT, DomTreeBuilder::BBUpdates);
+
+template bool llvm::DomTreeBuilder::Verify<DomTreeBuilder::BBDomTree>(
+    const DomTreeBuilder::BBDomTree &DT);
+template bool llvm::DomTreeBuilder::Verify<DomTreeBuilder::BBPostDomTree>(
+    const DomTreeBuilder::BBPostDomTree &DT);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 bool DominatorTree::invalidate(Function &F, const PreservedAnalyses &PA,
                                FunctionAnalysisManager::Invalidator &) {
@@ -308,6 +340,9 @@ void DominatorTree::verifyDomTree() const {
     print(errs());
     errs() << "\nActual:\n";
     OtherDT.print(errs());
+    errs() << "\nCFG:\n";
+    F.print(errs());
+    errs().flush();
     abort();
   }
 }

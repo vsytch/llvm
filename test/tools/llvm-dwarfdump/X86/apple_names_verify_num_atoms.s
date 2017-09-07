@@ -3,7 +3,11 @@
 # RUN: | FileCheck %s
 
 # CHECK: Verifying .apple_names...
+<<<<<<< HEAD
 # CHECK-NEXT: error: no atoms; failed to read HashData
+=======
+# CHECK-NEXT:	error: no atoms; failed to read HashData.
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 # This test is meant to verify that the -verify option 
 # in llvm-dwarfdump, correctly identifies that there is not Atom.
@@ -33,7 +37,11 @@ Lnames_begin:
 	.long	2                       ## Header Hash Count
 	.long	12                      ## Header Data Length
 	.long	0                       ## HeaderData Die Offset Base
+<<<<<<< HEAD
 	.long	0                       ## HeaderData Atom Count -- error: no atoms; failed to read HashData
+=======
+	.long	0                       ## HeaderData Atom Count -- error: no atoms; failed to read HashData.
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 	.short	1                       ## DW_ATOM_die_offset
 	.short	6                       ## DW_FORM_data4
 	.long	0                       ## Bucket 0

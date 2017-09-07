@@ -88,15 +88,22 @@ compiled by the system compiler in the debian8 image:
     ./llvm/utils/docker/build_docker_image.sh \
 	--source debian8 \
 	--docker-repository clang-debian8 --docker-tag "staging" \
+<<<<<<< HEAD
 	-- \
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 	-p clang -i install-clang -i install-clang-headers \
 	-- \
 	-DCMAKE_BUILD_TYPE=Release
 
+<<<<<<< HEAD
 Note there are two levels of ``--`` indirection. First one separates
 ``build_docker_image.sh`` arguments from ``llvm/utils/build_install_llvm.sh``
 arguments. Second one separates CMake arguments from ``build_install_llvm.sh``
 arguments. Note that build like that doesn't use a 2-stage build process that
+=======
+Note that a build like that doesn't use a 2-stage build process that
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 you probably want for clang. Running a 2-stage build is a little more intricate,
 this command will do that:
 
@@ -108,7 +115,10 @@ this command will do that:
     ./build_docker_image.sh \
 	--source debian8 \
 	--docker-repository clang-debian8 --docker-tag "staging" \
+<<<<<<< HEAD
 	-- \
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 	-p clang -i stage2-install-clang -i stage2-install-clang-headers \
 	-- \
 	-DLLVM_TARGETS_TO_BUILD=Native -DCMAKE_BUILD_TYPE=Release \
@@ -178,7 +188,10 @@ debian8-based image using the latest ``google/stable`` sources for you:
 
     ./llvm/utils/docker/build_docker_image.sh \
 	-s debian8 --d clang-debian8 -t "staging" \
+<<<<<<< HEAD
 	-- \
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 	--branch branches/google/stable \
 	-p clang -i install-clang -i install-clang-headers \
 	-- \

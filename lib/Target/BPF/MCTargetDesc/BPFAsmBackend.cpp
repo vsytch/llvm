@@ -29,7 +29,11 @@ public:
 
   void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
+<<<<<<< HEAD
                   uint64_t Value, bool IsPCRel) const override;
+=======
+                  uint64_t Value, bool IsResolved) const override;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   MCObjectWriter *createObjectWriter(raw_pwrite_stream &OS) const override;
 
@@ -65,7 +69,11 @@ bool BPFAsmBackend::writeNopData(uint64_t Count, MCObjectWriter *OW) const {
 void BPFAsmBackend::applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                                const MCValue &Target,
                                MutableArrayRef<char> Data, uint64_t Value,
+<<<<<<< HEAD
                                bool IsPCRel) const {
+=======
+                               bool IsResolved) const {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   if (Fixup.getKind() == FK_SecRel_4 || Fixup.getKind() == FK_SecRel_8) {
     assert(Value == 0);
   } else if (Fixup.getKind() == FK_Data_4 || Fixup.getKind() == FK_Data_8) {

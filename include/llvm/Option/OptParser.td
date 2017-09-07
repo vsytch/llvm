@@ -93,6 +93,10 @@ class Option<list<string> prefixes, string name, OptionKind kind> {
   string HelpText = ?;
   string MetaVarName = ?;
   string Values = ?;
+<<<<<<< HEAD
+=======
+  code ValuesCode = ?;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   list<OptionFlag> Flags = [];
   OptionGroup Group = ?;
   Option Alias = ?;
@@ -128,6 +132,10 @@ class Group<OptionGroup group> { OptionGroup Group = group; }
 class HelpText<string text> { string HelpText = text; }
 class MetaVarName<string name> { string MetaVarName = name; }
 class Values<string value> { string Values = value; }
+<<<<<<< HEAD
+=======
+class ValuesCode<code valuecode> { code ValuesCode = valuecode; }
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 // Predefined options.
 

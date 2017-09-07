@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 ; RUN: llc < %s -disable-fp-elim -march=arm -mcpu=cortex-a8 -mtriple arm-linux-gnu -target-abi=apcs -o - | FileCheck %s
+=======
+; RUN: llc < %s -disable-fp-elim -mcpu=cortex-a8 -mtriple arm-linux-gnu -target-abi=apcs -o - | FileCheck %s
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ;  This test is fairly fragile.  The goal is to ensure that "large" stack
 ;  objects are allocated closest to the stack protector (i.e., farthest away 
 ;  from the Stack Pointer.)  In standard SSP mode this means that large (>=

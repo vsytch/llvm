@@ -59,6 +59,11 @@ ArrayRef<uint8_t> toDebugT(ArrayRef<LeafRecord>, BumpPtrAllocator &Alloc);
 } // end namespace CodeViewYAML
 
 } // end namespace llvm
+<<<<<<< HEAD
+=======
+
+LLVM_YAML_DECLARE_SCALAR_TRAITS(codeview::GUID, true)
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 LLVM_YAML_DECLARE_MAPPING_TRAITS(CodeViewYAML::LeafRecord)
 LLVM_YAML_DECLARE_MAPPING_TRAITS(CodeViewYAML::MemberRecord)

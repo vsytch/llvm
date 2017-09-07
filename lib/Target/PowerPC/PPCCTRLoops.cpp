@@ -243,8 +243,13 @@ bool PPCCTRLoops::mightUseCTR(BasicBlock *BB) {
     if (CallInst *CI = dyn_cast<CallInst>(J)) {
       // Inline ASM is okay, unless it clobbers the ctr register.
       if (InlineAsm *IA = dyn_cast<InlineAsm>(CI->getCalledValue())) {
+<<<<<<< HEAD
 	if (asmClobbersCTR(IA))
 	  return true;
+=======
+        if (asmClobbersCTR(IA))
+          return true;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
         continue;
       }
 
@@ -607,7 +612,10 @@ bool PPCCTRLoops::convertToCTRLoop(Loop *L) {
   // The old condition may be dead now, and may have even created a dead PHI
   // (the original induction variable).
   RecursivelyDeleteTriviallyDeadInstructions(OldCond);
-  DeleteDeadPHIs(CountedExitBlock);
+  // Run through the basic blocks of the loop and see if any of them have dead
+  // PHIs that can be removed.
+  for (auto I : L->blocks())
+    DeleteDeadPHIs(I);
 
   ++NumCTRLoops;
   return MadeChange;

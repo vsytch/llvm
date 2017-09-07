@@ -14,6 +14,8 @@
 //===----------------------------------------------------------------------===//
 
 #include "llvm/CodeGen/GlobalISel/Legalizer.h"
+#include "llvm/ADT/SetVector.h"
+#include "llvm/CodeGen/GlobalISel/LegalizerCombiner.h"
 #include "llvm/CodeGen/GlobalISel/LegalizerHelper.h"
 #include "llvm/CodeGen/GlobalISel/Utils.h"
 #include "llvm/CodeGen/MachineOptimizationRemarkEmitter.h"
@@ -50,6 +52,7 @@ void Legalizer::getAnalysisUsage(AnalysisUsage &AU) const {
 void Legalizer::init(MachineFunction &MF) {
 }
 
+<<<<<<< HEAD
 bool Legalizer::combineMerges(MachineInstr &MI, MachineRegisterInfo &MRI,
                               const TargetInstrInfo &TII,
                               MachineIRBuilder &MIRBuilder) {
@@ -125,6 +128,8 @@ bool Legalizer::combineMerges(MachineInstr &MI, MachineRegisterInfo &MRI,
   return true;
 }
 
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 bool Legalizer::runOnMachineFunction(MachineFunction &MF) {
   // If the ISel pipeline failed, do not bother running that pass.
   if (MF.getProperties().hasProperty(
@@ -154,60 +159,96 @@ bool Legalizer::runOnMachineFunction(MachineFunction &MF) {
       if (!isPreISelGenericOpcode(MI->getOpcode()))
         continue;
       unsigned NumNewInsns = 0;
-      SmallVector<MachineInstr *, 4> WorkList;
+      using VecType = SetVector<MachineInstr *, SmallVector<MachineInstr *, 8>>;
+      VecType WorkList;
+      VecType CombineList;
       Helper.MIRBuilder.recordInsertions([&](MachineInstr *MI) {
         // Only legalize pre-isel generic instructions.
         // Legalization process could generate Target specific pseudo
         // instructions with generic types. Don't record them
         if (isPreISelGenericOpcode(MI->getOpcode())) {
           ++NumNewInsns;
-          WorkList.push_back(MI);
+          WorkList.insert(MI);
+          CombineList.insert(MI);
         }
       });
-      WorkList.push_back(&*MI);
-
+      WorkList.insert(&*MI);
+      LegalizerCombiner C(Helper.MIRBuilder, MF.getRegInfo());
       bool Changed = false;
       LegalizerHelper::LegalizeResult Res;
-      unsigned Idx = 0;
       do {
-        Res = Helper.legalizeInstrStep(*WorkList[Idx]);
-        // Error out if we couldn't legalize this instruction. We may want to
-        // fall back to DAG ISel instead in the future.
-        if (Res == LegalizerHelper::UnableToLegalize) {
-          Helper.MIRBuilder.stopRecordingInsertions();
+        assert(!WorkList.empty() && "Expecting illegal ops");
+        while (!WorkList.empty()) {
+          NumNewInsns = 0;
+          MachineInstr *CurrInst = WorkList.pop_back_val();
+          Res = Helper.legalizeInstrStep(*CurrInst);
+          // Error out if we couldn't legalize this instruction. We may want to
+          // fall back to DAG ISel instead in the future.
           if (Res == LegalizerHelper::UnableToLegalize) {
-            reportGISelFailure(MF, TPC, MORE, "gisel-legalize",
-                               "unable to legalize instruction",
-                               *WorkList[Idx]);
-            return false;
+            Helper.MIRBuilder.stopRecordingInsertions();
+            if (Res == LegalizerHelper::UnableToLegalize) {
+              reportGISelFailure(MF, TPC, MORE, "gisel-legalize",
+                                 "unable to legalize instruction", *CurrInst);
+              return false;
+            }
           }
-        }
-        Changed |= Res == LegalizerHelper::Legalized;
-        ++Idx;
+          Changed |= Res == LegalizerHelper::Legalized;
+          // If CurrInst was legalized, there's a good chance that it might have
+          // been erased. So remove it from the Combine List.
+          if (Res == LegalizerHelper::Legalized)
+            CombineList.remove(CurrInst);
 
 #ifndef NDEBUG
-        if (NumNewInsns) {
-          DEBUG(dbgs() << ".. .. Emitted " << NumNewInsns << " insns\n");
-          for (auto I = WorkList.end() - NumNewInsns, E = WorkList.end();
-               I != E; ++I)
-            DEBUG(dbgs() << ".. .. New MI: "; (*I)->print(dbgs()));
-          NumNewInsns = 0;
-        }
+          if (NumNewInsns)
+            for (unsigned I = WorkList.size() - NumNewInsns,
+                          E = WorkList.size();
+                 I != E; ++I)
+              DEBUG(dbgs() << ".. .. New MI: " << *WorkList[I];);
 #endif
-      } while (Idx < WorkList.size());
+        }
+        // Do the combines.
+        while (!CombineList.empty()) {
+          NumNewInsns = 0;
+          MachineInstr *CurrInst = CombineList.pop_back_val();
+          SmallVector<MachineInstr *, 4> DeadInstructions;
+          Changed |= C.tryCombineInstruction(*CurrInst, DeadInstructions);
+          for (auto *DeadMI : DeadInstructions) {
+            DEBUG(dbgs() << ".. Erasing Dead Instruction " << *DeadMI);
+            CombineList.remove(DeadMI);
+            WorkList.remove(DeadMI);
+            DeadMI->eraseFromParent();
+          }
+#ifndef NDEBUG
+          if (NumNewInsns)
+            for (unsigned I = CombineList.size() - NumNewInsns,
+                          E = CombineList.size();
+                 I != E; ++I)
+              DEBUG(dbgs() << ".. .. Combine New MI: " << *CombineList[I];);
+#endif
+        }
+      } while (!WorkList.empty());
 
       Helper.MIRBuilder.stopRecordingInsertions();
     }
   }
 
   MachineRegisterInfo &MRI = MF.getRegInfo();
-  const TargetInstrInfo &TII = *MF.getSubtarget().getInstrInfo();
+  MachineIRBuilder MIRBuilder(MF);
+  LegalizerCombiner C(MIRBuilder, MRI);
   for (auto &MBB : MF) {
     for (auto MI = MBB.begin(); MI != MBB.end(); MI = NextMI) {
       // Get the next Instruction before we try to legalize, because there's a
       // good chance MI will be deleted.
+      // TOOD: Perhaps move this to a combiner pass later?.
       NextMI = std::next(MI);
+<<<<<<< HEAD
       Changed |= combineMerges(*MI, MRI, TII, Helper.MIRBuilder);
+=======
+      SmallVector<MachineInstr *, 4> DeadInsts;
+      Changed |= C.tryCombineMerges(*MI, DeadInsts);
+      for (auto *DeadMI : DeadInsts)
+        DeadMI->eraseFromParent();
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     }
   }
 

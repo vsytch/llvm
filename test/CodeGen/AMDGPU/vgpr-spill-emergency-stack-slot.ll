@@ -13,7 +13,7 @@
 
 ; GCN-LABEL: {{^}}main:
 
-; GCN-DAG: s_mov_b32 s[[OFFREG:[0-9]+]], s12
+; GCN-NOT: s_mov_b32 s12
 ; GCN-DAG: s_mov_b32 s[[DESC0:[0-9]+]], SCRATCH_RSRC_DWORD0
 ; GCN-DAG: s_mov_b32 s{{[0-9]+}}, SCRATCH_RSRC_DWORD1
 ; GCN-DAG: s_mov_b32 s{{[0-9]+}}, -1
@@ -22,11 +22,12 @@
 ; GFX9-DAG: s_mov_b32 s[[DESC3:[0-9]+]], 0xe00000
 
 ; OFFREG is offset system SGPR
-; GCN: buffer_store_dword {{v[0-9]+}}, off, s{{\[}}[[DESC0]]:[[DESC3]]], s[[OFFREG]] offset:{{[0-9]+}} ; 4-byte Folded Spill
-; GCN: buffer_load_dword v{{[0-9]+}}, off, s{{\[}}[[DESC0]]:[[DESC3]]], s[[OFFREG]] offset:{{[0-9]+}} ; 4-byte Folded Reload
+; GCN: buffer_store_dword {{v[0-9]+}}, off, s{{\[}}[[DESC0]]:[[DESC3]]], s12 offset:{{[0-9]+}} ; 4-byte Folded Spill
+; GCN: buffer_load_dword v{{[0-9]+}}, off, s{{\[}}[[DESC0]]:[[DESC3]]], s12 offset:{{[0-9]+}} ; 4-byte Folded Reload
 ; GCN: NumVgprs: 256
 ; GCN: ScratchSize: 1536
 
+<<<<<<< HEAD
 define amdgpu_vs void @main([9 x <16 x i8>] addrspace(4)* byval %arg, [17 x <16 x i8>] addrspace(4)* byval %arg1, [17 x <4 x i32>] addrspace(4)* byval %arg2, [34 x <8 x i32>] addrspace(4)* byval %arg3, [16 x <16 x i8>] addrspace(4)* byval %arg4, i32 inreg %arg5, i32 inreg %arg6, i32 %arg7, i32 %arg8, i32 %arg9, i32 %arg10) #0 {
 bb:
   %tmp = getelementptr [17 x <16 x i8>], [17 x <16 x i8>] addrspace(4)* %arg1, i64 0, i64 0
@@ -36,6 +37,17 @@ bb:
   %tmp14 = call float @llvm.SI.load.const(<16 x i8> %tmp11, i32 32)
   %tmp15 = getelementptr [16 x <16 x i8>], [16 x <16 x i8>] addrspace(4)* %arg4, i64 0, i64 0
   %tmp16 = load <16 x i8>, <16 x i8> addrspace(4)* %tmp15, align 16, !tbaa !0
+=======
+define amdgpu_vs void @main([9 x <4 x i32>] addrspace(2)* byval %arg, [17 x <4 x i32>] addrspace(2)* byval %arg1, [17 x <4 x i32>] addrspace(2)* byval %arg2, [34 x <8 x i32>] addrspace(2)* byval %arg3, [16 x <4 x i32>] addrspace(2)* byval %arg4, i32 inreg %arg5, i32 inreg %arg6, i32 %arg7, i32 %arg8, i32 %arg9, i32 %arg10) #0 {
+bb:
+  %tmp = getelementptr [17 x <4 x i32>], [17 x <4 x i32>] addrspace(2)* %arg1, i64 0, i64 0
+  %tmp11 = load <4 x i32>, <4 x i32> addrspace(2)* %tmp, align 16, !tbaa !0
+  %tmp12 = call float @llvm.SI.load.const.v4i32(<4 x i32> %tmp11, i32 0)
+  %tmp13 = call float @llvm.SI.load.const.v4i32(<4 x i32> %tmp11, i32 16)
+  %tmp14 = call float @llvm.SI.load.const.v4i32(<4 x i32> %tmp11, i32 32)
+  %tmp15 = getelementptr [16 x <4 x i32>], [16 x <4 x i32>] addrspace(2)* %arg4, i64 0, i64 0
+  %tmp16 = load <4 x i32>, <4 x i32> addrspace(2)* %tmp15, align 16, !tbaa !0
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   %tmp17 = add i32 %arg5, %arg7
   %tmp16.cast = bitcast <4 x i32> %tmp16 to <4 x i32>
   %tmp18 = call <4 x float> @llvm.amdgcn.buffer.load.format.v4f32(<4 x i32> %tmp16.cast, i32 %tmp17, i32 0, i1 false, i1 false)

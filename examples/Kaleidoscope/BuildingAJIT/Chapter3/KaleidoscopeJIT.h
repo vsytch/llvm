@@ -101,8 +101,12 @@ public:
 
     // Add the set to the JIT with the resolver we created above and a newly
     // created SectionMemoryManager.
+<<<<<<< HEAD
     return CODLayer.addModule(std::move(M),
                               std::move(Resolver));
+=======
+    return cantFail(CODLayer.addModule(std::move(M), std::move(Resolver)));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   JITSymbol findSymbol(const std::string Name) {
@@ -113,7 +117,11 @@ public:
   }
 
   void removeModule(ModuleHandle H) {
+<<<<<<< HEAD
     CODLayer.removeModule(H);
+=======
+    cantFail(CODLayer.removeModule(H));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
 private:

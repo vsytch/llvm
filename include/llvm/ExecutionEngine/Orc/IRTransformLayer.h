@@ -42,13 +42,23 @@ public:
   ///        the layer below, along with the memory manager and symbol resolver.
   ///
   /// @return A handle for the added modules.
+<<<<<<< HEAD
   ModuleHandleT addModule(std::shared_ptr<Module> M,
                           std::shared_ptr<JITSymbolResolver> Resolver) {
+=======
+  Expected<ModuleHandleT>
+  addModule(std::shared_ptr<Module> M,
+            std::shared_ptr<JITSymbolResolver> Resolver) {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     return BaseLayer.addModule(Transform(std::move(M)), std::move(Resolver));
   }
 
   /// @brief Remove the module associated with the handle H.
+<<<<<<< HEAD
   void removeModule(ModuleHandleT H) { BaseLayer.removeModule(H); }
+=======
+  Error removeModule(ModuleHandleT H) { return BaseLayer.removeModule(H); }
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   /// @brief Search for the given named symbol.
   /// @param Name The name of the symbol to search for.
@@ -74,8 +84,13 @@ public:
   /// @brief Immediately emit and finalize the module represented by the given
   ///        handle.
   /// @param H Handle for module to emit/finalize.
+<<<<<<< HEAD
   void emitAndFinalize(ModuleHandleT H) {
     BaseLayer.emitAndFinalize(H);
+=======
+  Error emitAndFinalize(ModuleHandleT H) {
+    return BaseLayer.emitAndFinalize(H);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   /// @brief Access the transform functor directly.

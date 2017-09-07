@@ -73,7 +73,11 @@ body:             |
     %0(s32) = COPY %edi
     %1(s32) = COPY %esi
     %2(s32) = G_SUB %0, %1
+<<<<<<< HEAD
     %rax = COPY %2(s32)
+=======
+    %eax = COPY %2(s32)
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 ...
 ---

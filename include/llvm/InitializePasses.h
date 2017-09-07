@@ -1,4 +1,4 @@
-//===- llvm/InitializePasses.h -------- Initialize All Passes ---*- C++ -*-===//
+//===- llvm/InitializePasses.h - Initialize All Passes ----------*- C++ -*-===//
 //
 //                      The LLVM Compiler Infrastructure
 //
@@ -256,6 +256,7 @@ void initializeMemorySSAPrinterLegacyPassPass(PassRegistry&);
 void initializeMemorySSAWrapperPassPass(PassRegistry&);
 void initializeMemorySanitizerPass(PassRegistry&);
 void initializeMergeFunctionsPass(PassRegistry&);
+void initializeMergeICmpsPass(PassRegistry&);
 void initializeMergedLoadStoreMotionLegacyPassPass(PassRegistry&);
 void initializeMetaRenamerPass(PassRegistry&);
 void initializeModuleDebugInfoPrinterPass(PassRegistry&);
@@ -303,6 +304,7 @@ void initializeProfileSummaryInfoWrapperPassPass(PassRegistry&);
 void initializePromoteLegacyPassPass(PassRegistry&);
 void initializePruneEHPass(PassRegistry&);
 void initializeRABasicPass(PassRegistry&);
+void initializeRAFastPass(PassRegistry&);
 void initializeRAGreedyPass(PassRegistry&);
 void initializeReassociateLegacyPassPass(PassRegistry&);
 void initializeRegBankSelectPass(PassRegistry&);
@@ -375,6 +377,7 @@ void initializeWinEHPreparePass(PassRegistry&);
 void initializeWriteBitcodePassPass(PassRegistry&);
 void initializeWriteThinLTOBitcodePass(PassRegistry&);
 void initializeXRayInstrumentationPass(PassRegistry&);
-}
 
-#endif
+} // end namespace llvm
+
+#endif // LLVM_INITIALIZEPASSES_H

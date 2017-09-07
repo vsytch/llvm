@@ -17,8 +17,12 @@ DEPS:                           Types (TPI Stream)
 DEPS-NEXT: ============================================================
 DEPS-NEXT:   Showing 1 records and their dependents (4 records total)
 DEPS-NEXT:   0x100E | LF_ARGLIST [size = 8]
+<<<<<<< HEAD
 DEPS-NEXT:   0x1017 | LF_CLASS [size = 60]
 DEPS-NEXT:            class name: `MembersTest::A`
+=======
+DEPS-NEXT:   0x1017 | LF_CLASS [size = 60] `MembersTest::A`
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 DEPS-NEXT:            unique name: `.?AVA@MembersTest@@`
 DEPS-NEXT:            vtable: <no type>, base list: <no type>, field list: <no type>
 DEPS-NEXT:            options: forward ref | has unique name

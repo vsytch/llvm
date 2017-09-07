@@ -254,7 +254,11 @@ public:
 template <class Tr>
 class RegionBase : public RegionNodeBase<Tr> {
   friend class RegionInfoBase<Tr>;
+<<<<<<< HEAD
  
+=======
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   using FuncT = typename Tr::FuncT;
   using BlockT = typename Tr::BlockT;
   using RegionInfoT = typename Tr::RegionInfoT;

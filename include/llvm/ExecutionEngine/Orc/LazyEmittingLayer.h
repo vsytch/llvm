@@ -60,16 +60,24 @@ private:
           std::string PName = Name;
           JITSymbolFlags Flags = JITSymbolFlags::fromGlobalValue(*GV);
           auto GetAddress =
-            [this, ExportedSymbolsOnly, PName, &B]() -> JITTargetAddress {
+            [this, ExportedSymbolsOnly, PName, &B]() -> Expected<JITTargetAddress> {
               if (this->EmitState == Emitting)
                 return 0;
               else if (this->EmitState == NotEmitted) {
                 this->EmitState = Emitting;
-                Handle = this->emitToBaseLayer(B);
+                if (auto HandleOrErr = this->emitToBaseLayer(B))
+                  Handle = std::move(*HandleOrErr);
+                else
+                  return HandleOrErr.takeError();
                 this->EmitState = Emitted;
               }
-              auto Sym = B.findSymbolIn(Handle, PName, ExportedSymbolsOnly);
-              return Sym.getAddress();
+              if (auto Sym = B.findSymbolIn(Handle, PName, ExportedSymbolsOnly))
+                return Sym.getAddress();
+              else if (auto Err = Sym.takeError())
+                return std::move(Err);
+              else
+                llvm_unreachable("Successful symbol lookup should return "
+                                 "definition address here");
           };
           return JITSymbol(std::move(GetAddress), Flags);
         } else
@@ -86,9 +94,15 @@ private:
       llvm_unreachable("Invalid emit-state.");
     }
 
+<<<<<<< HEAD
     void removeModuleFromBaseLayer(BaseLayerT &BaseLayer) {
       if (EmitState != NotEmitted)
         BaseLayer.removeModule(Handle);
+=======
+    Error removeModuleFromBaseLayer(BaseLayerT& BaseLayer) {
+      return EmitState != NotEmitted ? BaseLayer.removeModule(Handle)
+                                     : Error::success();
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     }
 
     void emitAndFinalize(BaseLayerT &BaseLayer) {
@@ -127,7 +141,11 @@ private:
       return buildMangledSymbols(Name, ExportedSymbolsOnly);
     }
 
+<<<<<<< HEAD
     BaseLayerHandleT emitToBaseLayer(BaseLayerT &BaseLayer) {
+=======
+    Expected<BaseLayerHandleT> emitToBaseLayer(BaseLayerT &BaseLayer) {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
       // We don't need the mangled names set any more: Once we've emitted this
       // to the base layer we'll just look for symbols there.
       MangledSymbols.reset();
@@ -204,8 +222,14 @@ public:
   LazyEmittingLayer(BaseLayerT &BaseLayer) : BaseLayer(BaseLayer) {}
 
   /// @brief Add the given module to the lazy emitting layer.
+<<<<<<< HEAD
   ModuleHandleT addModule(std::shared_ptr<Module> M,
                           std::shared_ptr<JITSymbolResolver> Resolver) {
+=======
+  Expected<ModuleHandleT>
+  addModule(std::shared_ptr<Module> M,
+            std::shared_ptr<JITSymbolResolver> Resolver) {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     return ModuleList.insert(
         ModuleList.end(),
         llvm::make_unique<EmissionDeferredModule>(std::move(M),
@@ -216,9 +240,16 @@ public:
   ///
   ///   This method will free the memory associated with the given module, both
   /// in this layer, and the base layer.
+<<<<<<< HEAD
   void removeModule(ModuleHandleT H) {
     (*H)->removeModuleFromBaseLayer(BaseLayer);
     ModuleList.erase(H);
+=======
+  Error removeModule(ModuleHandleT H) {
+    Error Err = (*H)->removeModuleFromBaseLayer(BaseLayer);
+    ModuleList.erase(H);
+    return Err;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   /// @brief Search for the given named symbol.
@@ -251,8 +282,13 @@ public:
   /// @brief Immediately emit and finalize the module represented by the given
   ///        handle.
   /// @param H Handle for module to emit/finalize.
+<<<<<<< HEAD
   void emitAndFinalize(ModuleHandleT H) {
     (*H)->emitAndFinalize(BaseLayer);
+=======
+  Error emitAndFinalize(ModuleHandleT H) {
+    return (*H)->emitAndFinalize(BaseLayer);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 };
 

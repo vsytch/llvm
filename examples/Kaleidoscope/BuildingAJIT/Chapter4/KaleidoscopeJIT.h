@@ -128,14 +128,19 @@ public:
 
     // Add the set to the JIT with the resolver we created above and a newly
     // created SectionMemoryManager.
+<<<<<<< HEAD
     return OptimizeLayer.addModule(std::move(M),
                                    std::move(Resolver));
+=======
+    return cantFail(OptimizeLayer.addModule(std::move(M),
+                                            std::move(Resolver)));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   Error addFunctionAST(std::unique_ptr<FunctionAST> FnAST) {
     // Create a CompileCallback - this is the re-entry point into the compiler
     // for functions that haven't been compiled yet.
-    auto CCInfo = CompileCallbackMgr->getCompileCallback();
+    auto CCInfo = cantFail(CompileCallbackMgr->getCompileCallback());
 
     // Create an indirect stub. This serves as the functions "canonical
     // definition" - an unchanging (constant address) entry point to the
@@ -175,7 +180,7 @@ public:
         addModule(std::move(M));
         auto Sym = findSymbol(SharedFnAST->getName() + "$impl");
         assert(Sym && "Couldn't find compiled function?");
-        JITTargetAddress SymAddr = Sym.getAddress();
+        JITTargetAddress SymAddr = cantFail(Sym.getAddress());
         if (auto Err =
               IndirectStubsMgr->updatePointer(mangle(SharedFnAST->getName()),
                                               SymAddr)) {
@@ -195,7 +200,11 @@ public:
   }
 
   void removeModule(ModuleHandle H) {
+<<<<<<< HEAD
     OptimizeLayer.removeModule(H);
+=======
+    cantFail(OptimizeLayer.removeModule(H));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
 private:

@@ -55,6 +55,8 @@ public:
     AU.setPreservesCFG();
     MachineFunctionPass::getAnalysisUsage(AU);
   }
+
+  bool shouldSkip(const MachineInstr &MI, const MachineFunction &MF) const;
 };
 char AArch64DeadRegisterDefinitions::ID = 0;
 } // end anonymous namespace
@@ -66,6 +68,63 @@ static bool usesFrameIndex(const MachineInstr &MI) {
   for (const MachineOperand &MO : MI.uses())
     if (MO.isFI())
       return true;
+  return false;
+}
+
+bool
+AArch64DeadRegisterDefinitions::shouldSkip(const MachineInstr &MI,
+                                           const MachineFunction &MF) const {
+  if (!MF.getSubtarget<AArch64Subtarget>().hasLSE())
+    return false;
+
+#define CASE_AARCH64_ATOMIC_(PREFIX) \
+  case AArch64::PREFIX##X: \
+  case AArch64::PREFIX##W: \
+  case AArch64::PREFIX##H: \
+  case AArch64::PREFIX##B
+
+  for (const MachineMemOperand *MMO : MI.memoperands()) {
+    if (MMO->isAtomic()) {
+      unsigned Opcode = MI.getOpcode();
+      switch (Opcode) {
+      default:
+        return false;
+        break;
+
+      CASE_AARCH64_ATOMIC_(LDADDA):
+      CASE_AARCH64_ATOMIC_(LDADDAL):
+
+      CASE_AARCH64_ATOMIC_(LDCLRA):
+      CASE_AARCH64_ATOMIC_(LDCLRAL):
+
+      CASE_AARCH64_ATOMIC_(LDEORA):
+      CASE_AARCH64_ATOMIC_(LDEORAL):
+
+      CASE_AARCH64_ATOMIC_(LDSETA):
+      CASE_AARCH64_ATOMIC_(LDSETAL):
+
+      CASE_AARCH64_ATOMIC_(LDSMAXA):
+      CASE_AARCH64_ATOMIC_(LDSMAXAL):
+
+      CASE_AARCH64_ATOMIC_(LDSMINA):
+      CASE_AARCH64_ATOMIC_(LDSMINAL):
+
+      CASE_AARCH64_ATOMIC_(LDUMAXA):
+      CASE_AARCH64_ATOMIC_(LDUMAXAL):
+
+      CASE_AARCH64_ATOMIC_(LDUMINA):
+      CASE_AARCH64_ATOMIC_(LDUMINAL):
+
+      CASE_AARCH64_ATOMIC_(SWPA):
+      CASE_AARCH64_ATOMIC_(SWPAL):
+        return true;
+        break;
+                                                                    }
+    }
+  }
+
+#undef CASE_AARCH64_ATOMIC_
+
   return false;
 }
 
@@ -86,6 +145,7 @@ void AArch64DeadRegisterDefinitions::processMachineBasicBlock(
       DEBUG(dbgs() << "    Ignoring, XZR or WZR already used by the instruction\n");
       continue;
     }
+<<<<<<< HEAD
     if (MF.getSubtarget<AArch64Subtarget>().hasLSE()) {
       // XZ/WZ for LSE can only be used when acquire semantics are not used,
       // LDOPAL WZ is an invalid opcode.
@@ -131,6 +191,14 @@ void AArch64DeadRegisterDefinitions::processMachineBasicBlock(
         break;
       }
     }
+=======
+
+    if (shouldSkip(MI, MF)) {
+      DEBUG(dbgs() << "    Ignoring, Atomic instruction with acquire semantics using WZR/XZR\n");
+      continue;
+    }
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     const MCInstrDesc &Desc = MI.getDesc();
     for (int I = 0, E = Desc.getNumDefs(); I != E; ++I) {
       MachineOperand &MO = MI.getOperand(I);

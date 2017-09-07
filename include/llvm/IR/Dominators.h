@@ -34,15 +34,47 @@ class Module;
 class raw_ostream;
 
 extern template class DomTreeNodeBase<BasicBlock>;
-extern template class DominatorTreeBase<BasicBlock>;
+extern template class DominatorTreeBase<BasicBlock, false>; // DomTree
+extern template class DominatorTreeBase<BasicBlock, true>; // PostDomTree
 
 namespace DomTreeBuilder {
+<<<<<<< HEAD
 extern template void Calculate<Function, BasicBlock *>(
     DominatorTreeBaseByGraphTraits<GraphTraits<BasicBlock *>> &DT, Function &F);
 
 extern template void Calculate<Function, Inverse<BasicBlock *>>(
     DominatorTreeBaseByGraphTraits<GraphTraits<Inverse<BasicBlock *>>> &DT,
     Function &F);
+=======
+using BBDomTree = DomTreeBase<BasicBlock>;
+using BBPostDomTree = PostDomTreeBase<BasicBlock>;
+
+extern template struct Update<BasicBlock *>;
+
+using BBUpdates = ArrayRef<Update<BasicBlock *>>;
+
+extern template void Calculate<BBDomTree>(BBDomTree &DT);
+extern template void Calculate<BBPostDomTree>(BBPostDomTree &DT);
+
+extern template void InsertEdge<BBDomTree>(BBDomTree &DT, BasicBlock *From,
+                                           BasicBlock *To);
+extern template void InsertEdge<BBPostDomTree>(BBPostDomTree &DT,
+                                               BasicBlock *From,
+                                               BasicBlock *To);
+
+extern template void DeleteEdge<BBDomTree>(BBDomTree &DT, BasicBlock *From,
+                                           BasicBlock *To);
+extern template void DeleteEdge<BBPostDomTree>(BBPostDomTree &DT,
+                                               BasicBlock *From,
+                                               BasicBlock *To);
+
+extern template void ApplyUpdates<BBDomTree>(BBDomTree &DT, BBUpdates);
+extern template void ApplyUpdates<BBPostDomTree>(BBPostDomTree &DT, BBUpdates);
+
+extern template bool Verify<BBDomTree>(const BBDomTree &DT);
+extern template bool Verify<BBPostDomTree>(const BBPostDomTree &DT);
+}  // namespace DomTreeBuilder
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 extern template bool Verify<BasicBlock *>(
     const DominatorTreeBaseByGraphTraits<GraphTraits<BasicBlock *>> &DT);
@@ -122,14 +154,12 @@ template <> struct DenseMapInfo<BasicBlockEdge> {
 /// the dominator tree is initially constructed may still exist in the tree,
 /// even if the tree is properly updated. Calling code should not rely on the
 /// preceding statements; this is stated only to assist human understanding.
-class DominatorTree : public DominatorTreeBase<BasicBlock> {
-public:
-  using Base = DominatorTreeBase<BasicBlock>;
+class DominatorTree : public DominatorTreeBase<BasicBlock, false> {
+ public:
+  using Base = DominatorTreeBase<BasicBlock, false>;
 
-  DominatorTree() : DominatorTreeBase<BasicBlock>(false) {}
-  explicit DominatorTree(Function &F) : DominatorTreeBase<BasicBlock>(false) {
-    recalculate(F);
-  }
+  DominatorTree() = default;
+  explicit DominatorTree(Function &F) { recalculate(F); }
 
   /// Handle invalidation explicitly.
   bool invalidate(Function &F, const PreservedAnalyses &PA,

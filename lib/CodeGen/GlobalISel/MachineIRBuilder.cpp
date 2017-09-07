@@ -83,30 +83,26 @@ MachineInstrBuilder MachineIRBuilder::insertInstr(MachineInstrBuilder MIB) {
   return MIB;
 }
 
-MachineInstrBuilder MachineIRBuilder::buildDirectDbgValue(
-    unsigned Reg, const MDNode *Variable, const MDNode *Expr) {
+MachineInstrBuilder
+MachineIRBuilder::buildDirectDbgValue(unsigned Reg, const MDNode *Variable,
+                                      const MDNode *Expr) {
   assert(isa<DILocalVariable>(Variable) && "not a variable");
   assert(cast<DIExpression>(Expr)->isValid() && "not an expression");
   assert(cast<DILocalVariable>(Variable)->isValidLocationForIntrinsic(DL) &&
          "Expected inlined-at fields to agree");
-  return buildInstr(TargetOpcode::DBG_VALUE)
-      .addReg(Reg, RegState::Debug)
-      .addReg(0, RegState::Debug)
-      .addMetadata(Variable)
-      .addMetadata(Expr);
+  return insertInstr(BuildMI(getMF(), DL, getTII().get(TargetOpcode::DBG_VALUE),
+                             /*IsIndirect*/ false, Reg, Variable, Expr));
 }
 
-MachineInstrBuilder MachineIRBuilder::buildIndirectDbgValue(
-    unsigned Reg, unsigned Offset, const MDNode *Variable, const MDNode *Expr) {
+MachineInstrBuilder
+MachineIRBuilder::buildIndirectDbgValue(unsigned Reg, const MDNode *Variable,
+                                        const MDNode *Expr) {
   assert(isa<DILocalVariable>(Variable) && "not a variable");
   assert(cast<DIExpression>(Expr)->isValid() && "not an expression");
   assert(cast<DILocalVariable>(Variable)->isValidLocationForIntrinsic(DL) &&
          "Expected inlined-at fields to agree");
-  return buildInstr(TargetOpcode::DBG_VALUE)
-      .addReg(Reg, RegState::Debug)
-      .addImm(Offset)
-      .addMetadata(Variable)
-      .addMetadata(Expr);
+  return insertInstr(BuildMI(getMF(), DL, getTII().get(TargetOpcode::DBG_VALUE),
+                             /*IsIndirect*/ true, Reg, Variable, Expr));
 }
 
 MachineInstrBuilder MachineIRBuilder::buildFIDbgValue(int FI,
@@ -124,7 +120,6 @@ MachineInstrBuilder MachineIRBuilder::buildFIDbgValue(int FI,
 }
 
 MachineInstrBuilder MachineIRBuilder::buildConstDbgValue(const Constant &C,
-                                                         unsigned Offset,
                                                          const MDNode *Variable,
                                                          const MDNode *Expr) {
   assert(isa<DILocalVariable>(Variable) && "not a variable");
@@ -144,7 +139,7 @@ MachineInstrBuilder MachineIRBuilder::buildConstDbgValue(const Constant &C,
     MIB.addReg(0U);
   }
 
-  return MIB.addImm(Offset).addMetadata(Variable).addMetadata(Expr);
+  return MIB.addImm(0).addMetadata(Variable).addMetadata(Expr);
 }
 
 MachineInstrBuilder MachineIRBuilder::buildFrameIndex(unsigned Res, int Idx) {
@@ -351,14 +346,22 @@ MachineInstrBuilder MachineIRBuilder::buildZExt(unsigned Res, unsigned Op) {
   return buildInstr(TargetOpcode::G_ZEXT).addDef(Res).addUse(Op);
 }
 
+<<<<<<< HEAD
 MachineInstrBuilder MachineIRBuilder::buildSExtOrTrunc(unsigned Res,
                                                        unsigned Op) {
+=======
+MachineInstrBuilder
+MachineIRBuilder::buildExtOrTrunc(unsigned ExtOpc, unsigned Res, unsigned Op) {
+  assert((TargetOpcode::G_ANYEXT == ExtOpc || TargetOpcode::G_ZEXT == ExtOpc ||
+          TargetOpcode::G_SEXT == ExtOpc) &&
+         "Expecting Extending Opc");
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   assert(MRI->getType(Res).isScalar() || MRI->getType(Res).isVector());
   assert(MRI->getType(Res).isScalar() == MRI->getType(Op).isScalar());
 
   unsigned Opcode = TargetOpcode::COPY;
   if (MRI->getType(Res).getSizeInBits() > MRI->getType(Op).getSizeInBits())
-    Opcode = TargetOpcode::G_SEXT;
+    Opcode = ExtOpc;
   else if (MRI->getType(Res).getSizeInBits() < MRI->getType(Op).getSizeInBits())
     Opcode = TargetOpcode::G_TRUNC;
   else
@@ -367,8 +370,9 @@ MachineInstrBuilder MachineIRBuilder::buildSExtOrTrunc(unsigned Res,
   return buildInstr(Opcode).addDef(Res).addUse(Op);
 }
 
-MachineInstrBuilder MachineIRBuilder::buildZExtOrTrunc(unsigned Res,
+MachineInstrBuilder MachineIRBuilder::buildSExtOrTrunc(unsigned Res,
                                                        unsigned Op) {
+<<<<<<< HEAD
   assert(MRI->getType(Res).isScalar() || MRI->getType(Res).isVector());
   assert(MRI->getType(Res).isScalar() == MRI->getType(Op).isScalar());
 
@@ -379,10 +383,24 @@ MachineInstrBuilder MachineIRBuilder::buildZExtOrTrunc(unsigned Res,
     Opcode = TargetOpcode::G_TRUNC;
   else
     assert(MRI->getType(Res) == MRI->getType(Op));
+=======
+  return buildExtOrTrunc(TargetOpcode::G_SEXT, Res, Op);
+}
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
-  return buildInstr(Opcode).addDef(Res).addUse(Op);
+MachineInstrBuilder MachineIRBuilder::buildZExtOrTrunc(unsigned Res,
+                                                       unsigned Op) {
+  return buildExtOrTrunc(TargetOpcode::G_ZEXT, Res, Op);
 }
 
+<<<<<<< HEAD
+=======
+MachineInstrBuilder MachineIRBuilder::buildAnyExtOrTrunc(unsigned Res,
+                                                         unsigned Op) {
+  return buildExtOrTrunc(TargetOpcode::G_ANYEXT, Res, Op);
+}
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 MachineInstrBuilder MachineIRBuilder::buildCast(unsigned Dst, unsigned Src) {
   LLT SrcTy = MRI->getType(Src);
   LLT DstTy = MRI->getType(Dst);

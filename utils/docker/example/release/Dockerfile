@@ -17,8 +17,16 @@ FROM ubuntu
 LABEL maintainer "Maintainer <maintainer@email>"
 
 # FIXME: Install all packages you want to have in your release container.
+<<<<<<< HEAD
 # A minimal usefull installation must include libstdc++ and binutils.
 
 # Unpack clang installation into this container.
 # It is copied to this directory by build_docker_image.sh script.
 ADD clang.tar.gz /
+=======
+# A minimal useful installation must include libstdc++ and binutils.
+
+# Unpack clang installation into this container.
+# It is copied to this directory by build_docker_image.sh script.
+ADD clang.tar.gz /usr/local/
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0

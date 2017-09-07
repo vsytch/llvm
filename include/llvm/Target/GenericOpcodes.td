@@ -55,6 +55,15 @@ def G_IMPLICIT_DEF : Instruction {
   let hasSideEffects = 0;
 }
 
+<<<<<<< HEAD
+=======
+def G_PHI : Instruction {
+  let OutOperandList = (outs type0:$dst);
+  let InOperandList = (ins variable_ops);
+  let hasSideEffects = 0;
+}
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 def G_FRAME_INDEX : Instruction {
   let OutOperandList = (outs type0:$dst);
   let InOperandList = (ins unknown:$src2);

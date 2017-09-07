@@ -202,20 +202,32 @@ public:
         delete Mod;
     };
     LocalModules.push_back(std::shared_ptr<Module>(MPtr, std::move(Deleter)));
+<<<<<<< HEAD
     LazyEmitLayer.addModule(LocalModules.back(), Resolver);
+=======
+    cantFail(LazyEmitLayer.addModule(LocalModules.back(), Resolver));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   void addObjectFile(std::unique_ptr<object::ObjectFile> O) override {
     auto Obj =
       std::make_shared<object::OwningBinary<object::ObjectFile>>(std::move(O),
                                                                  nullptr);
+<<<<<<< HEAD
     ObjectLayer.addObject(std::move(Obj), Resolver);
+=======
+    cantFail(ObjectLayer.addObject(std::move(Obj), Resolver));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   void addObjectFile(object::OwningBinary<object::ObjectFile> O) override {
     auto Obj =
       std::make_shared<object::OwningBinary<object::ObjectFile>>(std::move(O));
+<<<<<<< HEAD
     ObjectLayer.addObject(std::move(Obj), Resolver);
+=======
+    cantFail(ObjectLayer.addObject(std::move(Obj), Resolver));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   void addArchive(object::OwningBinary<object::Archive> A) override {
@@ -225,16 +237,22 @@ public:
   bool removeModule(Module *M) override {
     for (auto I = LocalModules.begin(), E = LocalModules.end(); I != E; ++I) {
       if (I->get() == M) {
+<<<<<<< HEAD
 	ShouldDelete[M] = false;
 	LocalModules.erase(I);
 	return true;
+=======
+        ShouldDelete[M] = false;
+        LocalModules.erase(I);
+        return true;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
       }
     }
     return false;
   }
 
   uint64_t getSymbolAddress(StringRef Name) {
-    return findSymbol(Name).getAddress();
+    return cantFail(findSymbol(Name).getAddress());
   }
 
   JITSymbol findSymbol(StringRef Name) {
@@ -323,7 +341,11 @@ private:
           auto Obj =
             std::make_shared<object::OwningBinary<object::ObjectFile>>(
               std::move(ChildObj), nullptr);
+<<<<<<< HEAD
           ObjectLayer.addObject(std::move(Obj), Resolver);
+=======
+          cantFail(ObjectLayer.addObject(std::move(Obj), Resolver));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
           if (auto Sym = ObjectLayer.findSymbol(Name, true))
             return Sym;
         }
@@ -380,6 +402,12 @@ private:
   std::shared_ptr<LinkingResolver> Resolver;
   std::shared_ptr<JITSymbolResolver> ClientResolver;
   Mangler Mang;
+
+  // IMPORTANT: ShouldDelete *must* come before LocalModules: The shared_ptr
+  // delete blocks in LocalModules refer to the ShouldDelete map, so
+  // LocalModules needs to be destructed before ShouldDelete.
+  std::map<Module*, bool> ShouldDelete;
+  std::vector<std::shared_ptr<Module>> LocalModules;
 
   NotifyObjectLoadedT NotifyObjectLoaded;
   NotifyFinalizedT NotifyFinalized;

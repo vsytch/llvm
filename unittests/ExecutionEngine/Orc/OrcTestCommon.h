@@ -119,12 +119,20 @@ public:
                 RemoveModuleFtor &&RemoveModule,
                 FindSymbolFtor &&FindSymbol,
                 FindSymbolInFtor &&FindSymbolIn)
+<<<<<<< HEAD
       : AddModule(AddModule), RemoveModule(RemoveModule),
         FindSymbol(FindSymbol), FindSymbolIn(FindSymbolIn)
+=======
+      : AddModule(std::move(AddModule)),
+        RemoveModule(std::move(RemoveModule)),
+        FindSymbol(std::move(FindSymbol)),
+        FindSymbolIn(std::move(FindSymbolIn))
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   {}
 
   template <typename ModuleT, typename MemoryManagerPtrT,
             typename SymbolResolverPtrT>
+<<<<<<< HEAD
   ModuleHandleT addModule(ModuleT Ms, MemoryManagerPtrT MemMgr,
                           SymbolResolverPtrT Resolver) {
     return AddModule(std::move(Ms), std::move(MemMgr), std::move(Resolver));
@@ -132,6 +140,15 @@ public:
 
   void removeModule(ModuleHandleT H) {
     RemoveModule(H);
+=======
+  Expected<ModuleHandleT> addModule(ModuleT Ms, MemoryManagerPtrT MemMgr,
+                                    SymbolResolverPtrT Resolver) {
+    return AddModule(std::move(Ms), std::move(MemMgr), std::move(Resolver));
+  }
+
+  Error removeModule(ModuleHandleT H) {
+    return RemoveModule(H);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   JITSymbol findSymbol(const std::string &Name, bool ExportedSymbolsOnly) {
@@ -169,15 +186,24 @@ createMockBaseLayer(AddModuleFtor &&AddModule,
                          std::forward<FindSymbolInFtor>(FindSymbolIn));
 }
 
+
+class ReturnNullJITSymbol {
+public:
+  template <typename... Args>
+  JITSymbol operator()(Args...) const {
+    return nullptr;
+  }
+};
+
 template <typename ReturnT>
 class DoNothingAndReturn {
 public:
-  DoNothingAndReturn(ReturnT Val) : Val(Val) {}
+  DoNothingAndReturn(ReturnT Ret) : Ret(std::move(Ret)) {}
 
   template <typename... Args>
-  ReturnT operator()(Args...) const { return Val; }
+  void operator()(Args...) const { return Ret; }
 private:
-  ReturnT Val;
+  ReturnT Ret;
 };
 
 template <>

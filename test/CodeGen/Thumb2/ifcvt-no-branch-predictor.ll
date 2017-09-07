@@ -95,6 +95,7 @@ if.end:
 }
 
 ; CHECK-LABEL: diamond2:
+<<<<<<< HEAD
 ; CHECK-BP: itte
 ; CHECK-BP: streq
 ; CHECK-BP: ldreq
@@ -104,6 +105,19 @@ if.end:
 ; CHECK-NOBP: b
 ; CHECK-NOBP: str
 ; CHECK-NOBP: ldr
+=======
+; CHECK-BP: cbz
+; CHECK-BP: str
+; CHECK-BP: str
+; CHECK-BP: b
+; CHECK-BP: str
+; CHECK-BP: ldr
+; CHECK-NOBP: ittee
+; CHECK-NOBP: streq
+; CHECK-NOBP: ldreq
+; CHECK-NOBP: strne
+; CHECK-NOBP: strne
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 define i32 @diamond2(i32 %n, i32 %m, i32* %p, i32* %q) {
 entry:
   %tobool = icmp eq i32 %n, 0
@@ -111,6 +125,11 @@ entry:
 
 if.then:
   store i32 %n, i32* %p, align 4
+<<<<<<< HEAD
+=======
+  %arrayidx = getelementptr inbounds i32, i32* %p, i32 2
+  store i32 %n, i32* %arrayidx, align 4
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   br label %if.end
 
 if.else:

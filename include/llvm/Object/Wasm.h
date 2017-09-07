@@ -61,7 +61,7 @@ public:
 
   void print(raw_ostream &Out) const {
     Out << "Name=" << Name << ", Type=" << static_cast<int>(Type)
-        << ", Flags=" << Flags;
+        << ", Flags=" << Flags << " ElemIndex=" << ElementIndex;
   }
 
 #if !defined(NDEBUG) || defined(LLVM_ENABLE_DUMP)
@@ -69,8 +69,7 @@ public:
 #endif
 };
 
-class WasmSection {
-public:
+struct WasmSection {
   WasmSection() = default;
 
   uint32_t Type = 0; // Section type (See below)
@@ -78,6 +77,11 @@ public:
   StringRef Name; // Section name (User-defined sections only)
   ArrayRef<uint8_t> Content; // Section content
   std::vector<wasm::WasmRelocation> Relocations; // Relocations for this section
+};
+
+struct WasmSegment {
+  uint32_t SectionOffset;
+  wasm::WasmDataSegment Data;
 };
 
 class WasmObjectFile : public ObjectFile {
@@ -110,7 +114,7 @@ public:
     return ElemSegments;
   }
 
-  const std::vector<wasm::WasmDataSegment>& dataSegments() const {
+  const std::vector<WasmSegment>& dataSegments() const {
     return DataSegments;
   }
 
@@ -200,6 +204,8 @@ private:
   Error parseRelocSection(StringRef Name, const uint8_t *Ptr,
                           const uint8_t *End);
 
+  void populateSymbolTable();
+
   wasm::WasmObjectHeader Header;
   std::vector<WasmSection> Sections;
   std::vector<wasm::WasmSignature> Signatures;
@@ -210,13 +216,20 @@ private:
   std::vector<wasm::WasmImport> Imports;
   std::vector<wasm::WasmExport> Exports;
   std::vector<wasm::WasmElemSegment> ElemSegments;
-  std::vector<wasm::WasmDataSegment> DataSegments;
+  std::vector<WasmSegment> DataSegments;
   std::vector<wasm::WasmFunction> Functions;
   std::vector<WasmSymbol> Symbols;
   ArrayRef<uint8_t> CodeSection;
   uint32_t StartFunction = -1;
   bool HasLinkingSection = false;
   wasm::WasmLinkingData LinkingData;
+<<<<<<< HEAD
+=======
+  uint32_t NumImportedGlobals = 0;
+  uint32_t NumImportedFunctions = 0;
+  uint32_t ImportSection = 0;
+  uint32_t ExportSection = 0;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   StringMap<uint32_t> SymbolMap;
 };

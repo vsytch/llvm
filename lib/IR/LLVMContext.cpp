@@ -81,6 +81,18 @@ LLVMContext::LLVMContext() : pImpl(new LLVMContextImpl(*this)) {
   assert(GCTransitionEntry->second == LLVMContext::OB_gc_transition &&
          "gc-transition operand bundle id drifted!");
   (void)GCTransitionEntry;
+
+  SyncScope::ID SingleThreadSSID =
+      pImpl->getOrInsertSyncScopeID("singlethread");
+  assert(SingleThreadSSID == SyncScope::SingleThread &&
+         "singlethread synchronization scope ID drifted!");
+  (void)SingleThreadSSID;
+
+  SyncScope::ID SystemSSID =
+      pImpl->getOrInsertSyncScopeID("");
+  assert(SystemSSID == SyncScope::System &&
+         "system synchronization scope ID drifted!");
+  (void)SystemSSID;
 }
 
 LLVMContext::~LLVMContext() { delete pImpl; }
@@ -127,6 +139,7 @@ void LLVMContext::setDiagnosticHandler(DiagnosticHandlerTy DiagnosticHandler,
 
 void LLVMContext::setDiagnosticsHotnessRequested(bool Requested) {
   pImpl->DiagnosticsHotnessRequested = Requested;
+<<<<<<< HEAD
 }
 bool LLVMContext::getDiagnosticsHotnessRequested() const {
   return pImpl->DiagnosticsHotnessRequested;
@@ -135,6 +148,16 @@ bool LLVMContext::getDiagnosticsHotnessRequested() const {
 void LLVMContext::setDiagnosticsHotnessThreshold(uint64_t Threshold) {
   pImpl->DiagnosticsHotnessThreshold = Threshold;
 }
+=======
+}
+bool LLVMContext::getDiagnosticsHotnessRequested() const {
+  return pImpl->DiagnosticsHotnessRequested;
+}
+
+void LLVMContext::setDiagnosticsHotnessThreshold(uint64_t Threshold) {
+  pImpl->DiagnosticsHotnessThreshold = Threshold;
+}
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 uint64_t LLVMContext::getDiagnosticsHotnessThreshold() const {
   return pImpl->DiagnosticsHotnessThreshold;
 }
@@ -253,6 +276,14 @@ void LLVMContext::getOperandBundleTags(SmallVectorImpl<StringRef> &Tags) const {
 
 uint32_t LLVMContext::getOperandBundleTagID(StringRef Tag) const {
   return pImpl->getOperandBundleTagID(Tag);
+}
+
+SyncScope::ID LLVMContext::getOrInsertSyncScopeID(StringRef SSN) {
+  return pImpl->getOrInsertSyncScopeID(SSN);
+}
+
+void LLVMContext::getSyncScopeNames(SmallVectorImpl<StringRef> &SSNs) const {
+  pImpl->getSyncScopeNames(SSNs);
 }
 
 void LLVMContext::setGC(const Function &Fn, std::string GCName) {

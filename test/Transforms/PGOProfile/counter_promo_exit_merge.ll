@@ -1,5 +1,10 @@
+<<<<<<< HEAD
 ; RUN: opt < %s -instrprof -do-counter-promotion=true -speculative-counter-promotion -S | FileCheck --check-prefix=PROMO %s
 ; RUN: opt < %s --passes=instrprof -do-counter-promotion=true -speculative-counter-promotion -S | FileCheck --check-prefix=PROMO %s
+=======
+; RUN: opt < %s -instrprof -do-counter-promotion=true -speculative-counter-promotion-max-exiting=3 -S | FileCheck --check-prefix=PROMO %s
+; RUN: opt < %s --passes=instrprof -do-counter-promotion=true -speculative-counter-promotion-max-exiting=3 -S | FileCheck --check-prefix=PROMO %s
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 $__llvm_profile_raw_version = comdat any
 

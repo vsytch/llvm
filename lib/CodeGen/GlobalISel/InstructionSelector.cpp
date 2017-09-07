@@ -34,6 +34,7 @@ InstructionSelector::MatcherState::MatcherState(unsigned MaxRenderers)
     : Renderers(MaxRenderers, nullptr), MIs() {}
 
 InstructionSelector::InstructionSelector() = default;
+<<<<<<< HEAD
 
 void InstructionSelector::executeEmitTable(NewMIVector &OutMIs,
                                            MatcherState &State,
@@ -183,6 +184,8 @@ void InstructionSelector::executeEmitTable(NewMIVector &OutMIs,
     }
   }
 }
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 bool InstructionSelector::constrainOperandRegToRegClass(
     MachineInstr &I, unsigned OpIdx, const TargetRegisterClass &RC,

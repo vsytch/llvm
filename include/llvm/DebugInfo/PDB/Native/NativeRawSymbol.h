@@ -19,9 +19,15 @@ namespace pdb {
 
 class NativeSession;
 
+typedef uint32_t SymIndexId;
+
 class NativeRawSymbol : public IPDBRawSymbol {
 public:
+<<<<<<< HEAD
   NativeRawSymbol(NativeSession &PDBSession, uint32_t SymbolId);
+=======
+  NativeRawSymbol(NativeSession &PDBSession, SymIndexId SymbolId);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   virtual std::unique_ptr<NativeRawSymbol> clone() const = 0;
 
@@ -109,7 +115,7 @@ public:
   getVirtualBaseTableType() const override;
   PDB_DataKind getDataKind() const override;
   PDB_SymType getSymTag() const override;
-  PDB_UniqueId getGuid() const override;
+  codeview::GUID getGuid() const override;
   int32_t getOffset() const override;
   int32_t getThisAdjust() const override;
   int32_t getVirtualBasePointerOffset() const override;
@@ -205,7 +211,11 @@ public:
 
 protected:
   NativeSession &Session;
+<<<<<<< HEAD
   uint32_t SymbolId;
+=======
+  SymIndexId SymbolId;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 };
 
 } // end namespace pdb

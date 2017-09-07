@@ -27,15 +27,23 @@ define i32 @callee() nounwind noinline uwtable "function-instrument"="xray-alway
 ; CHECK-LABEL: .Ltmp1:
 ; CHECK-NEXT:  ret
 }
+<<<<<<< HEAD
 ; CHECK:       .p2align 4
 ; CHECK-NEXT:  .xword .Lxray_fn_idx_synth_0
 ; CHECK-NEXT:  .section xray_instr_map,{{.*}}
+=======
+; CHECK-LABEL: xray_instr_map
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK-LABEL: Lxray_sleds_start0:
 ; CHECK:       .xword .Lxray_sled_0
 ; CHECK:       .xword .Lxray_sled_1
 ; CHECK-LABEL: Lxray_sleds_end0:
+<<<<<<< HEAD
 ; CHECK:       .section xray_fn_idx,{{.*}}
 ; CHECK-LABEL: Lxray_fn_idx_synth_0:
+=======
+; CHECK-LABEL: xray_fn_idx
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK:       .xword .Lxray_sleds_start0
 ; CHECK-NEXT:  .xword .Lxray_sleds_end0
 
@@ -66,14 +74,21 @@ define i32 @caller() nounwind noinline uwtable "function-instrument"="xray-alway
 ; CHECK:       b	callee
   ret i32 %retval
 }
+<<<<<<< HEAD
 ; CHECK:       .p2align 4
 ; CHECK-NEXT:  .xword .Lxray_fn_idx_synth_1
 ; CHECK-NEXT:  .section xray_instr_map,{{.*}}
+=======
+; CHECK-LABEL: xray_instr_map
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK-LABEL: Lxray_sleds_start1:
 ; CHECK:       .xword .Lxray_sled_2
 ; CHECK:       .xword .Lxray_sled_3
 ; CHECK-LABEL: Lxray_sleds_end1:
 ; CHECK:       .section xray_fn_idx,{{.*}}
+<<<<<<< HEAD
 ; CHECK-LABEL: Lxray_fn_idx_synth_1:
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK:       .xword .Lxray_sleds_start1
 ; CHECK-NEXT:  .xword .Lxray_sleds_end1

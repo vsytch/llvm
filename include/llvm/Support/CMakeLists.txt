@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Figure out if we can track VC revisions.
 function(find_first_existing_file out_var)
   foreach(file ${ARGN})
@@ -33,6 +34,8 @@ macro(find_first_existing_vc_file out_var path)
   endif()
 endmacro()
 
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 find_first_existing_vc_file(llvm_vc "${LLVM_MAIN_SRC_DIR}")
 
 # The VC revision include that we want to generate.
@@ -40,7 +43,20 @@ set(version_inc "${CMAKE_CURRENT_BINARY_DIR}/VCSRevision.h")
 
 set(get_svn_script "${LLVM_CMAKE_PATH}/GenerateVersionFromCVS.cmake")
 
-if(DEFINED llvm_vc)
+file(WRITE "${version_inc}.empty" "")
+if((DEFINED llvm_vc) AND LLVM_APPEND_VC_REV)
+
+  execute_process(COMMAND ${CMAKE_COMMAND} -E compare_files
+      "${version_inc}.empty" "${version_inc}"
+      RESULT_VARIABLE files_not_equal
+      OUTPUT_QUIET
+      ERROR_QUIET)
+  # Remove ${version_inc} if it's empty -- toggling LLVM_APPEND_VC_REV
+  # from OFF to ON.
+  if(NOT files_not_equal)
+    file(REMOVE "${version_inc}")
+  endif()
+
   # Create custom target to generate the VC revision include.
   add_custom_command(OUTPUT "${version_inc}"
     DEPENDS "${llvm_vc}" "${get_svn_script}"
@@ -49,13 +65,16 @@ if(DEFINED llvm_vc)
                      "-DNAME=LLVM_REVISION"
                      "-DHEADER_FILE=${version_inc}"
                      -P "${get_svn_script}")
-
-  # Mark the generated header as being generated.
-  set_source_files_properties("${version_inc}"
-    PROPERTIES GENERATED TRUE
-               HEADER_FILE_ONLY TRUE)
 else()
-  file(WRITE "${version_inc}" "")
+  # Make sure ${version_inc} is an empty file.
+  execute_process(COMMAND ${CMAKE_COMMAND} -E copy_if_different
+    "${version_inc}.empty" "${version_inc}")
 endif()
+file(REMOVE "${version_inc}.empty")
+
+# Mark the generated header as being generated.
+set_source_files_properties("${version_inc}"
+  PROPERTIES GENERATED TRUE
+             HEADER_FILE_ONLY TRUE)
 
 add_custom_target(llvm_vcsrevision_h DEPENDS "${version_inc}")

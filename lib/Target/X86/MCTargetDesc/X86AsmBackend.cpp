@@ -110,7 +110,11 @@ public:
 
   void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
+<<<<<<< HEAD
                   uint64_t Value, bool IsPCRel) const override {
+=======
+                  uint64_t Value, bool IsResolved) const override {
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     unsigned Size = 1 << getFixupKindLog2Size(Fixup.getKind());
 
     assert(Fixup.getOffset() + Size <= Data.size() && "Invalid fixup offset!");

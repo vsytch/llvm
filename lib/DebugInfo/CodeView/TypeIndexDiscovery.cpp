@@ -382,12 +382,26 @@ static bool discoverTypeIndices(ArrayRef<uint8_t> Content, SymbolKind Kind,
   case SymbolKind::S_BUILDINFO:
     Refs.push_back({TiRefKind::IndexRef, 0, 1}); // Compile flags
     break;
+<<<<<<< HEAD
+=======
+  case SymbolKind::S_LTHREAD32:
+  case SymbolKind::S_GTHREAD32:
+    Refs.push_back({TiRefKind::TypeRef, 0, 1}); // Type
+    break;
+  case SymbolKind::S_FILESTATIC:
+    Refs.push_back({TiRefKind::TypeRef, 0, 1}); // Type
+    break;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   case SymbolKind::S_LOCAL:
     Refs.push_back({TiRefKind::TypeRef, 0, 1}); // Type
     break;
   case SymbolKind::S_CONSTANT:
     Refs.push_back({TiRefKind::TypeRef, 0, 1}); // Type
     break;
+<<<<<<< HEAD
+=======
+  case SymbolKind::S_BPREL32:
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   case SymbolKind::S_REGREL32:
     Refs.push_back({TiRefKind::TypeRef, 4, 1}); // Type
     break;
@@ -403,6 +417,13 @@ static bool discoverTypeIndices(ArrayRef<uint8_t> Content, SymbolKind Kind,
   case SymbolKind::S_INLINESITE:
     Refs.push_back({TiRefKind::IndexRef, 8, 1}); // ID of inlinee
     break;
+<<<<<<< HEAD
+=======
+  case SymbolKind::S_HEAPALLOCSITE:
+    // FIXME: It's not clear if this is a type or item reference.
+    Refs.push_back({TiRefKind::IndexRef, 8, 1}); // signature
+    break;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   // Defranges don't have types, just registers and code offsets.
   case SymbolKind::S_DEFRANGE_REGISTER:
@@ -419,6 +440,10 @@ static bool discoverTypeIndices(ArrayRef<uint8_t> Content, SymbolKind Kind,
   case SymbolKind::S_COMPILE:
   case SymbolKind::S_COMPILE2:
   case SymbolKind::S_COMPILE3:
+<<<<<<< HEAD
+=======
+  case SymbolKind::S_ENVBLOCK:
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   case SymbolKind::S_BLOCK32:
   case SymbolKind::S_FRAMEPROC:
     break;
@@ -438,6 +463,7 @@ void llvm::codeview::discoverTypeIndices(const CVType &Type,
   ::discoverTypeIndices(Type.content(), Type.kind(), Refs);
 }
 
+<<<<<<< HEAD
 void llvm::codeview::discoverTypeIndices(const CVType &Type,
                                          SmallVectorImpl<TypeIndex> &Indices) {
 
@@ -449,6 +475,19 @@ void llvm::codeview::discoverTypeIndices(const CVType &Type,
     return;
 
   BinaryStreamReader Reader(Type.content(), support::little);
+=======
+static void resolveTypeIndexReferences(ArrayRef<uint8_t> RecordData,
+                                       ArrayRef<TiReference> Refs,
+                                       SmallVectorImpl<TypeIndex> &Indices) {
+  Indices.clear();
+
+  if (Refs.empty())
+    return;
+
+  RecordData = RecordData.drop_front(sizeof(RecordPrefix));
+
+  BinaryStreamReader Reader(RecordData, support::little);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   for (const auto &Ref : Refs) {
     Reader.setOffset(Ref.Offset);
     FixedStreamArray<TypeIndex> Run;
@@ -457,6 +496,21 @@ void llvm::codeview::discoverTypeIndices(const CVType &Type,
   }
 }
 
+<<<<<<< HEAD
+=======
+void llvm::codeview::discoverTypeIndices(const CVType &Type,
+                                         SmallVectorImpl<TypeIndex> &Indices) {
+  return discoverTypeIndices(Type.RecordData, Indices);
+}
+
+void llvm::codeview::discoverTypeIndices(ArrayRef<uint8_t> RecordData,
+                                         SmallVectorImpl<TypeIndex> &Indices) {
+  SmallVector<TiReference, 4> Refs;
+  discoverTypeIndices(RecordData, Refs);
+  resolveTypeIndexReferences(RecordData, Refs, Indices);
+}
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 void llvm::codeview::discoverTypeIndices(ArrayRef<uint8_t> RecordData,
                                          SmallVectorImpl<TiReference> &Refs) {
   const RecordPrefix *P =
@@ -465,8 +519,34 @@ void llvm::codeview::discoverTypeIndices(ArrayRef<uint8_t> RecordData,
   ::discoverTypeIndices(RecordData.drop_front(sizeof(RecordPrefix)), K, Refs);
 }
 
+<<<<<<< HEAD
 bool llvm::codeview::discoverTypeIndices(const CVSymbol &Sym,
                                          SmallVectorImpl<TiReference> &Refs) {
   SymbolKind K = Sym.kind();
   return ::discoverTypeIndices(Sym.content(), K, Refs);
 }
+=======
+bool llvm::codeview::discoverTypeIndicesInSymbol(
+    const CVSymbol &Sym, SmallVectorImpl<TiReference> &Refs) {
+  SymbolKind K = Sym.kind();
+  return ::discoverTypeIndices(Sym.content(), K, Refs);
+}
+
+bool llvm::codeview::discoverTypeIndicesInSymbol(
+    ArrayRef<uint8_t> RecordData, SmallVectorImpl<TiReference> &Refs) {
+  const RecordPrefix *P =
+      reinterpret_cast<const RecordPrefix *>(RecordData.data());
+  SymbolKind K = static_cast<SymbolKind>(uint16_t(P->RecordKind));
+  return ::discoverTypeIndices(RecordData.drop_front(sizeof(RecordPrefix)), K,
+                               Refs);
+}
+
+bool llvm::codeview::discoverTypeIndicesInSymbol(
+    ArrayRef<uint8_t> RecordData, SmallVectorImpl<TypeIndex> &Indices) {
+  SmallVector<TiReference, 2> Refs;
+  if (!discoverTypeIndicesInSymbol(RecordData, Refs))
+    return false;
+  resolveTypeIndexReferences(RecordData, Refs, Indices);
+  return true;
+}
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0

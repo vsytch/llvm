@@ -11,7 +11,11 @@
 set -e
 
 function show_usage() {
+<<<<<<< HEAD
   usage=$(cat << EOF
+=======
+  cat << EOF
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 Usage: build_install_llvm.sh [options] -- [cmake-args]
 
 Checkout svn sources and run cmake with the specified arguments. Used
@@ -37,8 +41,11 @@ Required options: At least one --install-target.
 
 All options after '--' are passed to CMake invocation.
 EOF
+<<<<<<< HEAD
 )
   echo "$usage"
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 }
 
 LLVM_SVN_REV=""
@@ -48,6 +55,10 @@ CMAKE_INSTALL_TARGETS=""
 # We always checkout llvm
 LLVM_PROJECTS="llvm"
 CMAKE_LLVM_ENABLE_PROJECTS=""
+<<<<<<< HEAD
+=======
+CLANG_TOOLS_EXTRA_ENABLED=0
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 function contains_project() {
   local TARGET_PROJ="$1"
@@ -60,6 +71,20 @@ function contains_project() {
   return 1
 }
 
+<<<<<<< HEAD
+=======
+function append_project() {
+  local PROJ="$1"
+
+  LLVM_PROJECTS="$LLVM_PROJECTS $PROJ"
+  if [ "$CMAKE_LLVM_ENABLE_PROJECTS" != "" ]; then
+    CMAKE_LLVM_ENABLE_PROJECTS="$CMAKE_LLVM_ENABLE_PROJECTS;$PROJ"
+  else
+    CMAKE_LLVM_ENABLE_PROJECTS="$PROJ"
+  fi
+}
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -r|--revision)
@@ -75,6 +100,7 @@ while [[ $# -gt 0 ]]; do
     -p|--llvm-project)
       shift
       PROJ="$1"
+<<<<<<< HEAD
       if [ "$PROJ" == "cfe" ]; then
         PROJ="clang"
       fi
@@ -85,6 +111,29 @@ while [[ $# -gt 0 ]]; do
         echo "Project '$PROJ' is already enabled, ignoring extra occurences."
       fi
       shift
+=======
+      shift
+
+      if [ "$PROJ" == "cfe" ]; then
+        PROJ="clang"
+      fi
+
+      if [ "$PROJ" == "clang-tools-extra" ]; then
+        if [ $CLANG_TOOLS_EXTRA_ENABLED -ne 0 ]; then
+          echo "Project 'clang-tools-extra' is already enabled, ignoring extra occurences."
+        else
+          CLANG_TOOLS_EXTRA_ENABLED=1
+        fi
+
+        continue
+      fi
+
+      if ! contains_project "$PROJ" ; then
+        append_project "$PROJ"
+      else
+        echo "Project '$PROJ' is already enabled, ignoring extra occurences."
+      fi
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
       ;;
     -i|--install-target)
       shift
@@ -111,14 +160,35 @@ if [ "$CMAKE_INSTALL_TARGETS" == "" ]; then
   exit 1
 fi
 
+<<<<<<< HEAD
+=======
+if [ $CLANG_TOOLS_EXTRA_ENABLED -ne 0 ]; then
+  if ! contains_project "clang"; then
+    echo "Project 'clang-tools-extra' was enabled without 'clang'."
+    echo "Adding 'clang' to a list of projects."
+
+    append_project "clang"
+  fi
+fi
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 if [ "$LLVM_BRANCH" == "" ]; then
   LLVM_BRANCH="trunk"
 fi
 
+<<<<<<< HEAD
 if [ "$LLVM_SVN_REVISION" != "" ]; then
   SVN_REV_ARG="-r$LLVM_SVN_REVISION"
 else
   SVN_REV_ARG=""
+=======
+if [ "$LLVM_SVN_REV" != "" ]; then
+  SVN_REV_ARG="-r$LLVM_SVN_REV"
+  echo "Checking out svn revision r$LLVM_SVN_REV."
+else
+  SVN_REV_ARG=""
+  echo "Checking out latest svn revision."
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 fi
 
 CLANG_BUILD_DIR=/tmp/clang-build
@@ -136,20 +206,40 @@ for LLVM_PROJECT in $LLVM_PROJECTS; do
     SVN_PROJECT="$LLVM_PROJECT"
   fi
 
+<<<<<<< HEAD
   echo "Checking out http://llvm.org/svn/llvm-project/$SVN_PROJECT to $CLANG_BUILD_DIR/src/$LLVM_PROJECT"
   # FIXME: --trust-server-cert is required to workaround 'SSL issuer is not
   #        trusted' error. Using https seems preferable to http either way,
   #        albeit this is not secure.
   svn co -q $SVN_REV_ARG --trust-server-cert \
+=======
+  echo "Checking out https://llvm.org/svn/llvm-project/$SVN_PROJECT to $CLANG_BUILD_DIR/src/$LLVM_PROJECT"
+  svn co -q $SVN_REV_ARG \
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     "https://llvm.org/svn/llvm-project/$SVN_PROJECT/$LLVM_BRANCH" \
     "$CLANG_BUILD_DIR/src/$LLVM_PROJECT"
 done
 
+<<<<<<< HEAD
 pushd "$CLANG_BUILD_DIR"
 
 # Run the build as specified in the build arguments.
 echo "Running build"
 mkdir "$CLANG_BUILD_DIR/build"
+=======
+if [ $CLANG_TOOLS_EXTRA_ENABLED -ne 0 ]; then
+  echo "Checking out https://llvm.org/svn/llvm-project/clang-tools-extra to $CLANG_BUILD_DIR/src/clang/tools/extra"
+  svn co -q $SVN_REV_ARG \
+    "https://llvm.org/svn/llvm-project/clang-tools-extra/$LLVM_BRANCH" \
+    "$CLANG_BUILD_DIR/src/clang/tools/extra"
+fi
+
+mkdir "$CLANG_BUILD_DIR/build"
+pushd "$CLANG_BUILD_DIR/build"
+
+# Run the build as specified in the build arguments.
+echo "Running build"
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 cmake -GNinja \
   -DCMAKE_INSTALL_PREFIX="$CLANG_INSTALL_DIR" \
   -DLLVM_ENABLE_PROJECTS="$CMAKE_LLVM_ENABLE_PROJECTS" \

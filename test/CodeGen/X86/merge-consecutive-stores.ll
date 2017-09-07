@@ -16,11 +16,17 @@ define i32 @foo (i64* %so) nounwind uwtable ssp {
 ; CHECK-NEXT:    cmpl 16(%eax), %edx
 ; CHECK-NEXT:    movl $0, 16(%eax)
 ; CHECK-NEXT:    sbbl %ecx, %edx
+<<<<<<< HEAD
 ; CHECK-NEXT:    movl $-1, %eax
 ; CHECK-NEXT:    jl .LBB0_2
 ; CHECK-NEXT:  # BB#1:
 ; CHECK-NEXT:    xorl %eax, %eax
 ; CHECK-NEXT:  .LBB0_2:
+=======
+; CHECK-NEXT:    setl %al
+; CHECK-NEXT:    movzbl %al, %eax
+; CHECK-NEXT:    negl %eax
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK-NEXT:    retl
   %used = getelementptr inbounds i64, i64* %so, i32 3
   store i64 0, i64* %used, align 8

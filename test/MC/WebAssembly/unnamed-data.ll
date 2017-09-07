@@ -39,6 +39,7 @@
 ; CHECK-NEXT:         Index:           3
 ; CHECK-NEXT:   - Type:            DATA
 ; CHECK-NEXT:     Relocations:     
+<<<<<<< HEAD
 ; CHECK-NEXT:       - Type:            R_WEBASSEMBLY_GLOBAL_ADDR_I32
 ; CHECK-NEXT:         Index:           0
 ; CHECK-NEXT:         Offset:          0x00000016
@@ -47,6 +48,17 @@
 ; CHECK-NEXT:         Offset:          0x0000001E
 ; CHECK-NEXT:     Segments:        
 ; CHECK-NEXT:       - Index:           0
+=======
+; CHECK-NEXT:       - Type:            R_WEBASSEMBLY_MEMORY_ADDR_I32
+; CHECK-NEXT:         Index:           0
+; CHECK-NEXT:         Offset:          0x00000016
+; CHECK-NEXT:       - Type:            R_WEBASSEMBLY_MEMORY_ADDR_I32
+; CHECK-NEXT:         Index:           1
+; CHECK-NEXT:         Offset:          0x0000001E
+; CHECK-NEXT:     Segments:        
+; CHECK-NEXT:       - SectionOffset:   6
+; CHECK-NEXT:         MemoryIndex:     0
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK-NEXT:         Offset:          
 ; CHECK-NEXT:           Opcode:          I32_CONST
 ; CHECK-NEXT:           Value:           0
@@ -55,5 +67,8 @@
 ; CHECK-NEXT:     Name:            linking
 ; CHECK-NEXT:     DataSize:        28
 ; CHECK-NEXT:     DataAlignment:   8
+<<<<<<< HEAD
 ; CHECK-NEXT:     SymbolInfo:      
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK-NEXT: ...

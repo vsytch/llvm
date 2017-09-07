@@ -42,6 +42,7 @@ public:
                              const MCValue &Target) override;
 
   unsigned adjustFixupValue(const MCAssembler &Asm, const MCFixup &Fixup,
+<<<<<<< HEAD
                             const MCValue &Target, uint64_t Value, bool IsPCRel,
                             MCContext &Ctx, bool IsLittleEndian,
                             bool IsResolved) const;
@@ -49,6 +50,15 @@ public:
   void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
                   const MCValue &Target, MutableArrayRef<char> Data,
                   uint64_t Value, bool IsPCRel) const override;
+=======
+                            const MCValue &Target, uint64_t Value,
+                            bool IsResolved, MCContext &Ctx,
+                            bool IsLittleEndian) const;
+
+  void applyFixup(const MCAssembler &Asm, const MCFixup &Fixup,
+                  const MCValue &Target, MutableArrayRef<char> Data,
+                  uint64_t Value, bool IsResolved) const override;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   unsigned getRelaxedOpcode(unsigned Op) const;
 

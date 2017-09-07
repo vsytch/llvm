@@ -63,8 +63,13 @@ public:
           return JITSymbol(nullptr);
         },
         [](const std::string &S) { return nullptr; });
+<<<<<<< HEAD
     auto H = CompileLayer.addModule(std::move(M),
                                     std::move(Resolver));
+=======
+    auto H = cantFail(CompileLayer.addModule(std::move(M),
+                                             std::move(Resolver)));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
     ModuleHandles.push_back(H);
     return H;
@@ -72,7 +77,11 @@ public:
 
   void removeModule(ModuleHandleT H) {
     ModuleHandles.erase(find(ModuleHandles, H));
+<<<<<<< HEAD
     CompileLayer.removeModule(H);
+=======
+    cantFail(CompileLayer.removeModule(H));
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   JITSymbol findSymbol(const std::string Name) {
@@ -115,7 +124,7 @@ private:
       return JITSymbol(SymAddr, JITSymbolFlags::Exported);
 
 #ifdef LLVM_ON_WIN32
-    // For Windows retry without "_" at begining, as RTDyldMemoryManager uses
+    // For Windows retry without "_" at beginning, as RTDyldMemoryManager uses
     // GetProcAddress and standard libraries like msvcrt.dll use names
     // with and without "_" (for example "_itoa" but "sin").
     if (Name.length() > 2 && Name[0] == '_')

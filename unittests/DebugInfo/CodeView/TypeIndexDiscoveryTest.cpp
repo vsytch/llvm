@@ -131,7 +131,11 @@ private:
   void discoverTypeIndicesInSymbols() {
     Refs.resize(Symbols.size());
     for (uint32_t I = 0; I < Symbols.size(); ++I)
+<<<<<<< HEAD
       discoverTypeIndices(Symbols[I], Refs[I]);
+=======
+      discoverTypeIndicesInSymbol(Symbols[I], Refs[I]);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 
   // Helper function to write out a field list record with the given list

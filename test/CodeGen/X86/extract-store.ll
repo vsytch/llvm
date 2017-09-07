@@ -510,6 +510,7 @@ define void @extract_f64_1(double* nocapture %dst, <2 x double> %foo) nounwind {
 }
 
 define void @extract_f128_0(fp128* nocapture %dst, <2 x fp128> %foo) nounwind {
+<<<<<<< HEAD
 ; X32-LABEL: extract_f128_0:
 ; X32:       # BB#0:
 ; X32-NEXT:    pushl %edi
@@ -526,6 +527,24 @@ define void @extract_f128_0(fp128* nocapture %dst, <2 x fp128> %foo) nounwind {
 ; X32-NEXT:    popl %esi
 ; X32-NEXT:    popl %edi
 ; X32-NEXT:    retl
+=======
+; SSE-X32-LABEL: extract_f128_0:
+; SSE-X32:       # BB#0:
+; SSE-X32-NEXT:    pushl %edi
+; SSE-X32-NEXT:    pushl %esi
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %eax
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %ecx
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %edx
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %esi
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %edi
+; SSE-X32-NEXT:    movl %esi, 12(%edi)
+; SSE-X32-NEXT:    movl %edx, 8(%edi)
+; SSE-X32-NEXT:    movl %ecx, 4(%edi)
+; SSE-X32-NEXT:    movl %eax, (%edi)
+; SSE-X32-NEXT:    popl %esi
+; SSE-X32-NEXT:    popl %edi
+; SSE-X32-NEXT:    retl
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ;
 ; SSE2-X64-LABEL: extract_f128_0:
 ; SSE2-X64:       # BB#0:
@@ -539,6 +558,16 @@ define void @extract_f128_0(fp128* nocapture %dst, <2 x fp128> %foo) nounwind {
 ; SSE41-X64-NEXT:    movq %rsi, (%rdi)
 ; SSE41-X64-NEXT:    retq
 ;
+<<<<<<< HEAD
+=======
+; AVX-X32-LABEL: extract_f128_0:
+; AVX-X32:       # BB#0:
+; AVX-X32-NEXT:    vmovups {{[0-9]+}}(%esp), %xmm0
+; AVX-X32-NEXT:    movl {{[0-9]+}}(%esp), %eax
+; AVX-X32-NEXT:    vmovups %xmm0, (%eax)
+; AVX-X32-NEXT:    retl
+;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; AVX-X64-LABEL: extract_f128_0:
 ; AVX-X64:       # BB#0:
 ; AVX-X64-NEXT:    movq %rdx, 8(%rdi)
@@ -555,6 +584,7 @@ define void @extract_f128_0(fp128* nocapture %dst, <2 x fp128> %foo) nounwind {
 }
 
 define void @extract_f128_1(fp128* nocapture %dst, <2 x fp128> %foo) nounwind {
+<<<<<<< HEAD
 ; X32-LABEL: extract_f128_1:
 ; X32:       # BB#0:
 ; X32-NEXT:    pushl %edi
@@ -571,6 +601,24 @@ define void @extract_f128_1(fp128* nocapture %dst, <2 x fp128> %foo) nounwind {
 ; X32-NEXT:    popl %esi
 ; X32-NEXT:    popl %edi
 ; X32-NEXT:    retl
+=======
+; SSE-X32-LABEL: extract_f128_1:
+; SSE-X32:       # BB#0:
+; SSE-X32-NEXT:    pushl %edi
+; SSE-X32-NEXT:    pushl %esi
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %eax
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %ecx
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %edx
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %esi
+; SSE-X32-NEXT:    movl {{[0-9]+}}(%esp), %edi
+; SSE-X32-NEXT:    movl %esi, 12(%edi)
+; SSE-X32-NEXT:    movl %edx, 8(%edi)
+; SSE-X32-NEXT:    movl %ecx, 4(%edi)
+; SSE-X32-NEXT:    movl %eax, (%edi)
+; SSE-X32-NEXT:    popl %esi
+; SSE-X32-NEXT:    popl %edi
+; SSE-X32-NEXT:    retl
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ;
 ; SSE2-X64-LABEL: extract_f128_1:
 ; SSE2-X64:       # BB#0:
@@ -584,6 +632,16 @@ define void @extract_f128_1(fp128* nocapture %dst, <2 x fp128> %foo) nounwind {
 ; SSE41-X64-NEXT:    movq %rcx, (%rdi)
 ; SSE41-X64-NEXT:    retq
 ;
+<<<<<<< HEAD
+=======
+; AVX-X32-LABEL: extract_f128_1:
+; AVX-X32:       # BB#0:
+; AVX-X32-NEXT:    vmovups {{[0-9]+}}(%esp), %xmm0
+; AVX-X32-NEXT:    movl {{[0-9]+}}(%esp), %eax
+; AVX-X32-NEXT:    vmovups %xmm0, (%eax)
+; AVX-X32-NEXT:    retl
+;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; AVX-X64-LABEL: extract_f128_1:
 ; AVX-X64:       # BB#0:
 ; AVX-X64-NEXT:    movq %r8, 8(%rdi)

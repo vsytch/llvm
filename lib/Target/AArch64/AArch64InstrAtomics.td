@@ -407,6 +407,7 @@ def CMP_SWAP_128 : Pseudo<(outs GPR64:$RdLo, GPR64:$RdHi, GPR32:$scratch),
                    Sched<[WriteAtomic]>;
 
 // v8.1 Atomic instructions:
+<<<<<<< HEAD
 def : Pat<(atomic_load_add_8 GPR64:$Rn, GPR32:$Rs), (LDADDALb GPR32:$Rs, GPR64sp:$Rn)>;
 def : Pat<(atomic_load_add_16 GPR64:$Rn, GPR32:$Rs), (LDADDALh GPR32:$Rs, GPR64sp:$Rn)>;
 def : Pat<(atomic_load_add_32 GPR64:$Rn, GPR32:$Rs), (LDADDALs GPR32:$Rs, GPR64sp:$Rn)>;
@@ -451,3 +452,19 @@ def : Pat<(atomic_swap_8 GPR64:$Rn, GPR32:$Rs), (SWPALb GPR32:$Rs, GPR64sp:$Rn)>
 def : Pat<(atomic_swap_16 GPR64:$Rn, GPR32:$Rs), (SWPALh GPR32:$Rs, GPR64sp:$Rn)>;
 def : Pat<(atomic_swap_32 GPR64:$Rn, GPR32:$Rs), (SWPALs GPR32:$Rs, GPR64sp:$Rn)>;
 def : Pat<(atomic_swap_64 GPR64:$Rn, GPR64:$Rs), (SWPALd GPR64:$Rs, GPR64sp:$Rn)>;
+=======
+let Predicates = [HasLSE] in {
+  defm : LDOPregister_patterns<"LDADD", "atomic_load_add">;
+  defm : LDOPregister_patterns<"LDSET", "atomic_load_or">;
+  defm : LDOPregister_patterns<"LDEOR", "atomic_load_xor">;
+  defm : LDOPregister_patterns<"LDSMAX", "atomic_load_max">;
+  defm : LDOPregister_patterns<"LDSMIN", "atomic_load_min">;
+  defm : LDOPregister_patterns<"LDUMAX", "atomic_load_umax">;
+  defm : LDOPregister_patterns<"LDUMIN", "atomic_load_umin">;
+  defm : LDOPregister_patterns<"SWP", "atomic_swap">;
+  defm : LDOPregister_patterns_mod<"LDADD", "atomic_load_sub", "SUB">;
+  defm : LDOPregister_patterns_mod<"LDCLR", "atomic_load_and", "ORN">;
+  defm : CASregister_patterns<"CAS", "atomic_cmp_swap">;
+}
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0

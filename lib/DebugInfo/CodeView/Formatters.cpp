@@ -9,6 +9,10 @@
 
 #include "llvm/DebugInfo/CodeView/Formatters.h"
 #include "llvm/ADT/ArrayRef.h"
+<<<<<<< HEAD
+=======
+#include "llvm/DebugInfo/CodeView/GUID.h"
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 #include "llvm/Support/raw_ostream.h"
 #include <algorithm>
 #include <cassert>
@@ -38,4 +42,10 @@ void GuidAdapter::format(raw_ostream &Stream, StringRef Style) {
       Stream << "-";
   }
   Stream << "}";
+}
+
+raw_ostream &llvm::codeview::operator<<(raw_ostream &OS, const GUID &Guid) {
+  codeview::detail::GuidAdapter A(Guid.Guid);
+  A.format(OS, "");
+  return OS;
 }

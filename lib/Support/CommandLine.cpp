@@ -46,17 +46,6 @@ using namespace cl;
 
 #define DEBUG_TYPE "commandline"
 
-#if LLVM_ENABLE_ABI_BREAKING_CHECKS
-namespace llvm {
-// If LLVM_ENABLE_ABI_BREAKING_CHECKS is set the flag -mllvm -reverse-iterate
-// can be used to toggle forward/reverse iteration of unordered containers.
-// This will help uncover differences in codegen caused due to undefined
-// iteration order.
-static cl::opt<bool, true> ReverseIteration("reverse-iterate",
-  cl::location(ReverseIterate<bool>::value));
-}
-#endif
-
 //===----------------------------------------------------------------------===//
 // Template instantiations and anchors.
 //
@@ -1236,7 +1225,7 @@ bool CommandLineParser::ParseCommandLineOptions(int argc,
              << ": Not enough positional command line arguments specified!\n"
              << "Must specify at least " << NumPositionalRequired
              << " positional argument" << (NumPositionalRequired > 1 ? "s" : "")
-             << ": See: " << argv[0] << " - help\n";
+             << ": See: " << argv[0] << " -help\n";
 
     ErrorParsing = true;
   } else if (!HasUnlimitedPositionals &&

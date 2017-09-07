@@ -140,6 +140,36 @@ template <typename T> struct MemberRecordImpl : public MemberRecordBase {
 } // end namespace detail
 } // end namespace CodeViewYAML
 } // end namespace llvm
+<<<<<<< HEAD
+=======
+
+void ScalarTraits<GUID>::output(const GUID &G, void *, llvm::raw_ostream &OS) {
+  OS << G;
+}
+
+StringRef ScalarTraits<GUID>::input(StringRef Scalar, void *Ctx, GUID &S) {
+  if (Scalar.size() != 38)
+    return "GUID strings are 38 characters long";
+  if (Scalar[0] != '{' || Scalar[37] != '}')
+    return "GUID is not enclosed in {}";
+  if (Scalar[9] != '-' || Scalar[14] != '-' || Scalar[19] != '-' ||
+      Scalar[24] != '-')
+    return "GUID sections are not properly delineated with dashes";
+
+  uint8_t *OutBuffer = S.Guid;
+  for (auto Iter = Scalar.begin(); Iter != Scalar.end();) {
+    if (*Iter == '-' || *Iter == '{' || *Iter == '}') {
+      ++Iter;
+      continue;
+    }
+    uint8_t Value = (llvm::hexDigitValue(*Iter++) << 4);
+    Value |= llvm::hexDigitValue(*Iter++);
+    *OutBuffer++ = Value;
+  }
+
+  return "";
+}
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 void ScalarTraits<TypeIndex>::output(const TypeIndex &S, void *,
                                      raw_ostream &OS) {

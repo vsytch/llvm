@@ -15,6 +15,10 @@
 
 #include "llvm/DebugInfo/CodeView/Formatters.h"
 #include "llvm/DebugInfo/CodeView/LazyRandomTypeCollection.h"
+<<<<<<< HEAD
+=======
+#include "llvm/DebugInfo/MSF/MSFCommon.h"
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 #include "llvm/DebugInfo/MSF/MappedBlockStream.h"
 #include "llvm/DebugInfo/PDB/Native/DbiStream.h"
 #include "llvm/DebugInfo/PDB/Native/InfoStream.h"
@@ -120,6 +124,14 @@ Error BytesOutputStyle::dump() {
     P.NewLine();
   }
 
+<<<<<<< HEAD
+=======
+  if (opts::bytes::Fpm) {
+    dumpFpm();
+    P.NewLine();
+  }
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   if (!opts::bytes::DumpStreamData.empty()) {
     dumpStreamBytes();
     P.NewLine();
@@ -401,6 +413,7 @@ void BytesOutputStyle::dumpModuleC11() {
                  });
 }
 
+<<<<<<< HEAD
 static std::string formatChunkKind(DebugSubsectionKind Kind) {
   switch (Kind) {
     RETURN_CASE(DebugSubsectionKind, None, "none");
@@ -422,6 +435,8 @@ static std::string formatChunkKind(DebugSubsectionKind Kind) {
   return formatUnknownEnum(Kind);
 }
 
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 void BytesOutputStyle::dumpModuleC13() {
   printHeader(P, "Debug Chunks");
 
@@ -480,6 +495,16 @@ BytesOutputStyle::initializeTypes(uint32_t StreamIdx) {
   return *TypeCollection;
 }
 
+<<<<<<< HEAD
+=======
+void BytesOutputStyle::dumpFpm() {
+  printHeader(P, "Free Page Map");
+
+  msf::MSFStreamLayout FpmLayout = File.getFpmStreamLayout();
+  P.formatMsfStreamBlocks(File, FpmLayout);
+}
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 void BytesOutputStyle::dumpStreamBytes() {
   if (StreamPurposes.empty())
     discoverStreamPurposes(File, StreamPurposes);
@@ -495,7 +520,13 @@ void BytesOutputStyle::dumpStreamBytes() {
       P.formatLine("Stream {0}: Not present", Spec.SI);
       continue;
     }
+<<<<<<< HEAD
     P.formatMsfStreamData("Data", File, Spec.SI, StreamPurposes[Spec.SI],
                           Spec.Begin, Spec.Size);
+=======
+    P.formatMsfStreamData("Data", File, Spec.SI,
+                          StreamPurposes[Spec.SI].getShortName(), Spec.Begin,
+                          Spec.Size);
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   }
 }

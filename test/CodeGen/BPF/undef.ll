@@ -14,6 +14,7 @@
 
 ; Function Attrs: nounwind uwtable
 define i32 @ebpf_filter(%struct.__sk_buff* nocapture readnone %ebpf_packet) #0 section "socket1" {
+<<<<<<< HEAD
 ; CHECK: r1 = r10
 ; CHECK: r1 += -2
 ; CHECK: r2 = 0
@@ -39,6 +40,32 @@ define i32 @ebpf_filter(%struct.__sk_buff* nocapture readnone %ebpf_packet) #0 s
 ; CHECK: *(u16 *)(r10 + 6) = r2
 ; CHECK: *(u16 *)(r10 - 2) = r2
 ; CHECK: *(u16 *)(r10 + 26) = r2
+=======
+; EL: r1 = 134678021
+; EB: r1 = 84281096
+; CHECK: *(u32 *)(r10 - 8) = r1
+; EL: r1 = 2569
+; EB: r1 = 2314
+; CHECK: *(u16 *)(r10 - 4) = r1
+
+; CHECK: r1 = 0
+; CHECK: *(u16 *)(r10 + 24) = r1
+; CHECK: *(u16 *)(r10 + 22) = r1
+; CHECK: *(u16 *)(r10 + 20) = r1
+; CHECK: *(u16 *)(r10 + 18) = r1
+; CHECK: *(u16 *)(r10 + 16) = r1
+; CHECK: *(u16 *)(r10 + 14) = r1
+; CHECK: *(u16 *)(r10 + 12) = r1
+; CHECK: *(u16 *)(r10 + 10) = r1
+; CHECK: *(u16 *)(r10 + 8) = r1
+; CHECK: *(u16 *)(r10 + 6) = r1
+; CHECK: *(u16 *)(r10 + 4) = r1
+; CHECK: *(u16 *)(r10 + 2) = r1
+; CHECK: *(u16 *)(r10 + 0) = r1
+; CHECK: *(u16 *)(r10 - 2) = r1
+; CHECK: *(u16 *)(r10 + 26) = r1
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK: r2 = r10
 ; CHECK: r2 += -8
 ; CHECK: r1 = <MCOperand Expr:(routing)>ll

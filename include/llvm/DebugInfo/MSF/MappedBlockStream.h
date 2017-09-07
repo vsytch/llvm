@@ -12,7 +12,11 @@
 
 #include "llvm/ADT/ArrayRef.h"
 #include "llvm/ADT/DenseMap.h"
+<<<<<<< HEAD
 #include "llvm/DebugInfo/MSF/MSFStreamLayout.h"
+=======
+#include "llvm/DebugInfo/MSF/MSFCommon.h"
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 #include "llvm/Support/Allocator.h"
 #include "llvm/Support/BinaryStream.h"
 #include "llvm/Support/BinaryStreamRef.h"
@@ -122,7 +126,7 @@ public:
 
   static std::unique_ptr<WritableMappedBlockStream>
   createFpmStream(const MSFLayout &Layout, WritableBinaryStreamRef MsfData,
-                  BumpPtrAllocator &Allocator);
+                  BumpPtrAllocator &Allocator, bool AltFpm = false);
 
   support::endianness getEndian() const override {
     return support::little;

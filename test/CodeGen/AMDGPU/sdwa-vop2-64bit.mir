@@ -8,7 +8,11 @@
 
 # GCN: %{{[0-9]+}} = V_BCNT_U32_B32_e64 %{{[0-9]+}}, killed %{{[0-9]+}}, implicit-def %vcc, implicit %exec
 # GCN: %{{[0-9]+}} = V_BFM_B32_e64 %{{[0-9]+}}, killed %{{[0-9]+}}, implicit-def %vcc, implicit %exec
+<<<<<<< HEAD
 # GCN: %{{[0-9]+}} = V_CVT_PKNORM_I16_F32_e64 0, %{{[0-9]+}}, 0, killed %{{[0-9]+}}, 0, 0, implicit-def %vcc, implicit %exec
+=======
+# GCN: %{{[0-9]+}} = V_CVT_PKNORM_I16_F32_e64 0, %{{[0-9]+}}, 0, killed %{{[0-9]+}}, 0, implicit-def %vcc, implicit %exec
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 # GCN: %{{[0-9]+}} = V_READLANE_B32 killed %{{[0-9]+}}, 0, implicit-def %vcc, implicit %exec
 
 ---
@@ -50,7 +54,11 @@ body:             |
     %15 = V_BFM_B32_e64 %13, killed %14, implicit-def %vcc, implicit %exec
 
     %16 = V_LSHRREV_B32_e64 16, %15, implicit %exec
+<<<<<<< HEAD
     %17 = V_CVT_PKNORM_I16_F32_e64 0, %15, 0, killed %16, 0, 0, implicit-def %vcc, implicit %exec
+=======
+    %17 = V_CVT_PKNORM_I16_F32_e64 0, %15, 0, killed %16, 0, implicit-def %vcc, implicit %exec
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
     %18 = V_LSHRREV_B32_e64 16, %17, implicit %exec
     %19 = V_READLANE_B32 killed %18, 0, implicit-def %vcc, implicit %exec

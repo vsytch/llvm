@@ -24,9 +24,13 @@ define i32 @foo() nounwind noinline uwtable "function-instrument"="xray-always" 
 ; CHECK-LABEL: Ltmp1:
 ; CHECK-NEXT:  ret
 }
+<<<<<<< HEAD
 ; CHECK:       .p2align 4
 ; CHECK-NEXT:  .xword .Lxray_fn_idx_synth_0
 ; CHECK-NEXT:  .section xray_instr_map,{{.*}}
+=======
+; CHECK-LABEL: xray_instr_map
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; CHECK-LABEL: Lxray_sleds_start0
 ; CHECK:       .xword .Lxray_sled_0
 ; CHECK:       .xword .Lxray_sled_1

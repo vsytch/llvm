@@ -73,6 +73,7 @@ ELF-NEXT:   }
 
 WASM:      Symbols [
 WASM-NEXT:   Symbol {
+<<<<<<< HEAD
 WASM-NEXT:     Name: bar
 WASM-NEXT:     Type: GLOBAL_IMPORT (0x2)
 WASM-NEXT:     Flags: 0x0
@@ -90,6 +91,35 @@ WASM-NEXT:   }
 WASM-NEXT:   Symbol {
 WASM-NEXT:     Name: foo
 WASM-NEXT:     Type: DEBUG_FUNCTION_NAME (0x4)
+=======
+WASM-NEXT:     Name: puts
+WASM-NEXT:     Type: DEBUG_FUNCTION_NAME (0x4)
+WASM-NEXT:     Flags: 0x0
+WASM-NEXT:   }
+WASM-NEXT:   Symbol {
+WASM-NEXT:     Name: SomeOtherFunction
+WASM-NEXT:     Type: DEBUG_FUNCTION_NAME (0x4)
+WASM-NEXT:     Flags: 0x0
+WASM-NEXT:   }
+WASM-NEXT:   Symbol {
+WASM-NEXT:     Name: main
+WASM-NEXT:     Type: DEBUG_FUNCTION_NAME (0x4)
+WASM-NEXT:     Flags: 0x0
+WASM-NEXT:   }
+WASM-NEXT:   Symbol {
+WASM-NEXT:     Name: puts
+WASM-NEXT:     Type: FUNCTION_IMPORT (0x0)
+WASM-NEXT:     Flags: 0x0
+WASM-NEXT:   }
+WASM-NEXT:   Symbol {
+WASM-NEXT:     Name: SomeOtherFunction
+WASM-NEXT:     Type: FUNCTION_IMPORT (0x0)
+WASM-NEXT:     Flags: 0x0
+WASM-NEXT:   }
+WASM-NEXT:   Symbol {
+WASM-NEXT:     Name: main
+WASM-NEXT:     Type: FUNCTION_EXPORT (0x1)
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 WASM-NEXT:     Flags: 0x0
 WASM-NEXT:   }
 WASM-NEXT: ]

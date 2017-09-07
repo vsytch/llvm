@@ -102,5 +102,22 @@ AArch64MCAsmInfoELF::AArch64MCAsmInfoELF(const Triple &T) {
 }
 
 AArch64MCAsmInfoCOFF::AArch64MCAsmInfoCOFF() {
+<<<<<<< HEAD
   CommentString = ";";
 }
+=======
+  PrivateGlobalPrefix = ".L";
+  PrivateLabelPrefix = ".L";
+  AlignmentIsInBytes = false;
+  SupportsDebugInformation = true;
+  ExceptionsType = ExceptionHandling::WinEH;
+}
+
+AArch64MCAsmInfoMicrosoftCOFF::AArch64MCAsmInfoMicrosoftCOFF() {
+  CommentString = ";";
+}
+
+AArch64MCAsmInfoGNUCOFF::AArch64MCAsmInfoGNUCOFF() {
+  CommentString = "//";
+}
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0

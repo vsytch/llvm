@@ -13,12 +13,18 @@
 #include "llvm/DebugInfo/PDB/Native/DbiStream.h"
 #include "llvm/DebugInfo/PDB/Native/InfoStream.h"
 #include "llvm/DebugInfo/PDB/Native/NativeEnumModules.h"
+#include "llvm/DebugInfo/PDB/Native/NativeEnumTypes.h"
 #include "llvm/DebugInfo/PDB/Native/PDBFile.h"
+#include "llvm/DebugInfo/PDB/Native/TpiStream.h"
 
 namespace llvm {
 namespace pdb {
 
+<<<<<<< HEAD
 NativeExeSymbol::NativeExeSymbol(NativeSession &Session, uint32_t SymbolId)
+=======
+NativeExeSymbol::NativeExeSymbol(NativeSession &Session, SymIndexId SymbolId)
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     : NativeRawSymbol(Session, SymbolId), File(Session.getPDBFile()) {}
 
 std::unique_ptr<NativeRawSymbol> NativeExeSymbol::clone() const {
@@ -38,6 +44,8 @@ NativeExeSymbol::findChildren(PDB_SymType Type) const {
     consumeError(Dbi.takeError());
     break;
   }
+  case PDB_SymType::Enum:
+    return Session.createTypeEnumerator(codeview::LF_ENUM);
   default:
     break;
   }
@@ -56,12 +64,12 @@ std::string NativeExeSymbol::getSymbolsFileName() const {
   return File.getFilePath();
 }
 
-PDB_UniqueId NativeExeSymbol::getGuid() const {
+codeview::GUID NativeExeSymbol::getGuid() const {
   auto IS = File.getPDBInfoStream();
   if (IS)
     return IS->getGuid();
   consumeError(IS.takeError());
-  return PDB_UniqueId{{0}};
+  return codeview::GUID{{0}};
 }
 
 bool NativeExeSymbol::hasCTypes() const {

@@ -44,7 +44,14 @@ define void @fn2() {
 ; X64:       # BB#0:
 ; X64-NEXT:    xorl %eax, %eax
 ; X64-NEXT:    decl {{.*}}(%rip)
+<<<<<<< HEAD
 ; X64-NEXT:    cmovnel {{.*}}(%rip), %eax
+=======
+; X64-NEXT:    je .LBB1_2
+; X64-NEXT:  # BB#1:
+; X64-NEXT:    movl {{.*}}(%rip), %eax
+; X64-NEXT:  .LBB1_2:
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ; X64-NEXT:    movl %eax, {{.*}}(%rip)
 ; X64-NEXT:    retq
   %1 = load volatile i32, i32* @b, align 4

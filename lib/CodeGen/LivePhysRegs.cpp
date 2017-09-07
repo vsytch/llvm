@@ -192,7 +192,8 @@ void LivePhysRegs::addLiveOutsNoPristines(const MachineBasicBlock &MBB) {
     const MachineFrameInfo &MFI = MF.getFrameInfo();
     if (MFI.isCalleeSavedInfoValid()) {
       for (const CalleeSavedInfo &Info : MFI.getCalleeSavedInfo())
-        addReg(Info.getReg());
+        if (Info.isRestored())
+          addReg(Info.getReg());
     }
   }
 }
@@ -217,16 +218,22 @@ void LivePhysRegs::addLiveIns(const MachineBasicBlock &MBB) {
 }
 
 void llvm::computeLiveIns(LivePhysRegs &LiveRegs,
-                          const MachineRegisterInfo &MRI,
-                          MachineBasicBlock &MBB) {
+                          const MachineBasicBlock &MBB) {
+  const MachineFunction &MF = *MBB.getParent();
+  const MachineRegisterInfo &MRI = MF.getRegInfo();
   const TargetRegisterInfo &TRI = *MRI.getTargetRegisterInfo();
-  assert(MBB.livein_empty());
   LiveRegs.init(TRI);
   LiveRegs.addLiveOutsNoPristines(MBB);
-  for (MachineInstr &MI : make_range(MBB.rbegin(), MBB.rend()))
+  for (const MachineInstr &MI : make_range(MBB.rbegin(), MBB.rend()))
     LiveRegs.stepBackward(MI);
+}
 
-  for (unsigned Reg : LiveRegs) {
+void llvm::addLiveIns(MachineBasicBlock &MBB, const LivePhysRegs &LiveRegs) {
+  assert(MBB.livein_empty() && "Expected empty live-in list");
+  const MachineFunction &MF = *MBB.getParent();
+  const MachineRegisterInfo &MRI = MF.getRegInfo();
+  const TargetRegisterInfo &TRI = *MRI.getTargetRegisterInfo();
+  for (MCPhysReg Reg : LiveRegs) {
     if (MRI.isReserved(Reg))
       continue;
     // Skip the register if we are about to add one of its super registers.
@@ -241,4 +248,10 @@ void llvm::computeLiveIns(LivePhysRegs &LiveRegs,
       continue;
     MBB.addLiveIn(Reg);
   }
+}
+
+void llvm::computeAndAddLiveIns(LivePhysRegs &LiveRegs,
+                                MachineBasicBlock &MBB) {
+  computeLiveIns(LiveRegs, MBB);
+  addLiveIns(MBB, LiveRegs);
 }

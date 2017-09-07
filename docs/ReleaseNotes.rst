@@ -1,12 +1,12 @@
 ========================
-LLVM 5.0.0 Release Notes
+LLVM 6.0.0 Release Notes
 ========================
 
 .. contents::
     :local:
 
 .. warning::
-   These are in-progress notes for the upcoming LLVM 5 release.
+   These are in-progress notes for the upcoming LLVM 6 release.
    Release notes for previous releases can be found on
    `the Download Page <http://releases.llvm.org/download.html>`_.
 
@@ -40,6 +40,7 @@ Non-comprehensive list of changes in this release
    functionality, or simply have a lot to talk about), see the `NOTE` below
    for adding a new subsection.
 
+<<<<<<< HEAD
 * LLVM's ``WeakVH`` has been renamed to ``WeakTrackingVH`` and a new ``WeakVH``
   has been introduced.  The new ``WeakVH`` nulls itself out on deletion, but
   does not track values across RAUW.
@@ -57,6 +58,9 @@ Non-comprehensive list of changes in this release
 * The ``BBVectorize`` pass has been removed. It was fully replaced and no
   longer used back in 2014 but we didn't get around to removing it. Now it is
   gone. The SLP vectorizer is the suggested non-loop vectorization pass.
+=======
+* Note..
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 .. NOTE
    If you would like to document a larger change, then you can add a
@@ -112,6 +116,7 @@ Changes to the OCaml bindings
 Changes to the C API
 --------------------
 
+<<<<<<< HEAD
 * Deprecated the ``LLVMAddBBVectorizePass`` interface since the ``BBVectorize``
   pass has been removed. It is now a no-op and will be removed in the next
   release. Use ``LLVMAddSLPVectorizePass`` instead to get the supported SLP
@@ -119,6 +124,12 @@ Changes to the C API
 
 
 External Open Source Projects Using LLVM 5
+=======
+ During this release ...
+
+
+External Open Source Projects Using LLVM 6
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 ==========================================
 
 * A project...

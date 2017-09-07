@@ -40,7 +40,8 @@ class TargetRegisterInfo;
 /// This is convenient because std::bitset does not have a constructor
 /// with an initializer list of set bits.
 ///
-/// Each InstructionSelector subclass should define a PredicateBitset class with:
+/// Each InstructionSelector subclass should define a PredicateBitset class
+/// with:
 ///   const unsigned MAX_SUBTARGET_PREDICATES = 192;
 ///   using PredicateBitset = PredicateBitsetImpl<MAX_SUBTARGET_PREDICATES>;
 /// and updating the constant to suit the target. Tablegen provides a suitable
@@ -62,6 +63,21 @@ public:
 };
 
 enum {
+<<<<<<< HEAD
+=======
+  /// Begin a try-block to attempt a match and jump to OnFail if it is
+  /// unsuccessful.
+  /// - OnFail - The MatchTable entry at which to resume if the match fails.
+  ///
+  /// FIXME: This ought to take an argument indicating the number of try-blocks
+  ///        to exit on failure. It's usually one but the last match attempt of
+  ///        a block will need more. The (implemented) alternative is to tack a
+  ///        GIM_Reject on the end of each try-block which is simpler but
+  ///        requires an extra opcode and iteration in the interpreter on each
+  ///        failed match.
+  GIM_Try,
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   /// Record the specified instruction
   /// - NewInsnID - Instruction ID to define
   /// - InsnID - Instruction ID
@@ -80,6 +96,13 @@ enum {
   /// - InsnID - Instruction ID
   /// - Expected number of operands
   GIM_CheckNumOperands,
+<<<<<<< HEAD
+=======
+  /// Check an immediate predicate on the specified instruction
+  /// - InsnID - Instruction ID
+  /// - The predicate to test
+  GIM_CheckImmPredicate,
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   /// Check the type for the specified operand
   /// - InsnID - Instruction ID
@@ -102,21 +125,48 @@ enum {
   /// - OpIdx - Operand index
   /// - Expected integer
   GIM_CheckConstantInt,
+<<<<<<< HEAD
   /// Check the operand is a specific literal integer (i.e. MO.isImm() or MO.isCImm() is true).
+=======
+  /// Check the operand is a specific literal integer (i.e. MO.isImm() or
+  /// MO.isCImm() is true).
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   /// - InsnID - Instruction ID
   /// - OpIdx - Operand index
   /// - Expected integer
   GIM_CheckLiteralInt,
+<<<<<<< HEAD
+=======
+  /// Check the operand is a specific intrinsic ID
+  /// - InsnID - Instruction ID
+  /// - OpIdx - Operand index
+  /// - Expected Intrinsic ID
+  GIM_CheckIntrinsicID,
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   /// Check the specified operand is an MBB
   /// - InsnID - Instruction ID
   /// - OpIdx - Operand index
   GIM_CheckIsMBB,
 
+<<<<<<< HEAD
   /// A successful match
   GIM_Accept,
 };
 
 enum {
+=======
+  /// Check if the specified operand is safe to fold into the current
+  /// instruction.
+  /// - InsnID - Instruction ID
+  GIM_CheckIsSafeToFold,
+
+  /// Fail the current try-block, or completely fail to match if there is no
+  /// current try-block.
+  GIM_Reject,
+
+  //=== Renderers ===
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   /// Mutate an instruction
   /// - NewInsnID - Instruction ID to define
   /// - OldInsnID - Instruction ID to mutate
@@ -159,6 +209,15 @@ enum {
   /// - RendererID - The renderer to call
   GIR_ComplexRenderer,
 
+<<<<<<< HEAD
+=======
+  /// Render a G_CONSTANT operator as a sign-extended immediate.
+  /// - NewInsnID - Instruction ID to modify
+  /// - OldInsnID - Instruction ID to copy from
+  /// The operand index is implicitly 1.
+  GIR_CopyConstantAsSImm,
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   /// Constrain an instruction operand to a register class.
   /// - InsnID - Instruction ID to modify
   /// - OpIdx - Operand index
@@ -170,6 +229,12 @@ enum {
   GIR_ConstrainSelectedInstOperands,
   /// Merge all memory operands into instruction.
   /// - InsnID - Instruction ID to modify
+<<<<<<< HEAD
+=======
+  /// - MergeInsnID... - One or more Instruction ID to merge into the result.
+  /// - GIU_MergeMemOperands_EndOfList - Terminates the list of instructions to
+  ///                                    merge.
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   GIR_MergeMemOperands,
   /// Erase from parent.
   /// - InsnID - Instruction ID to erase
@@ -179,9 +244,23 @@ enum {
   GIR_Done,
 };
 
+<<<<<<< HEAD
 /// Provides the logic to select generic machine instructions.
 class InstructionSelector {
 public:
+=======
+enum {
+  /// Indicates the end of the variable-length MergeInsnID list in a
+  /// GIR_MergeMemOperands opcode.
+  GIU_MergeMemOperands_EndOfList = -1,
+};
+
+/// Provides the logic to select generic machine instructions.
+class InstructionSelector {
+public:
+  typedef bool(*ImmediatePredicateFn)(int64_t);
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   virtual ~InstructionSelector() = default;
 
   /// Select the (possibly generic) instruction \p I to only use target-specific
@@ -201,6 +280,7 @@ protected:
   using ComplexRendererFn = std::function<void(MachineInstrBuilder &)>;
   using RecordedMIVector = SmallVector<MachineInstr *, 4>;
   using NewMIVector = SmallVector<MachineInstrBuilder, 4>;
+<<<<<<< HEAD
 
   struct MatcherState {
     std::vector<ComplexRendererFn> Renderers;
@@ -209,11 +289,25 @@ protected:
     MatcherState(unsigned MaxRenderers);
   };
 
+=======
+
+  struct MatcherState {
+    std::vector<ComplexRendererFn> Renderers;
+    RecordedMIVector MIs;
+
+    MatcherState(unsigned MaxRenderers);
+  };
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 public:
   template <class PredicateBitset, class ComplexMatcherMemFn>
   struct MatcherInfoTy {
     const LLT *TypeObjects;
     const PredicateBitset *FeatureBitsets;
+<<<<<<< HEAD
+=======
+    const ImmediatePredicateFn *ImmPredicateFns;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
     const std::vector<ComplexMatcherMemFn> ComplexPredicates;
   };
 
@@ -225,6 +319,7 @@ protected:
   template <class TgtInstructionSelector, class PredicateBitset,
             class ComplexMatcherMemFn>
   bool executeMatchTable(
+<<<<<<< HEAD
       TgtInstructionSelector &ISel, MatcherState &State,
       const MatcherInfoTy<PredicateBitset, ComplexMatcherMemFn> &MatcherInfo,
       const int64_t *MatchTable, MachineRegisterInfo &MRI,
@@ -234,6 +329,14 @@ protected:
                         const int64_t *EmitTable, const TargetInstrInfo &TII,
                         const TargetRegisterInfo &TRI,
                         const RegisterBankInfo &RBI) const;
+=======
+      TgtInstructionSelector &ISel, NewMIVector &OutMIs, MatcherState &State,
+      const MatcherInfoTy<PredicateBitset, ComplexMatcherMemFn> &MatcherInfo,
+      const int64_t *MatchTable, const TargetInstrInfo &TII,
+      MachineRegisterInfo &MRI, const TargetRegisterInfo &TRI,
+      const RegisterBankInfo &RBI,
+      const PredicateBitset &AvailableFeatures) const;
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
   /// Constrain a register operand of an instruction \p I to a specified
   /// register class. This could involve inserting COPYs before (for uses) or

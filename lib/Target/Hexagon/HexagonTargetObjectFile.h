@@ -36,6 +36,11 @@ namespace llvm {
     bool shouldPutJumpTableInFunctionSection(bool UsesLabelDifference,
                                              const Function &F) const override;
 
+<<<<<<< HEAD
+=======
+    const Function *getLutUsedFunction(const GlobalObject *GO) const;
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   private:
     MCSectionELF *SmallDataSection;
     MCSectionELF *SmallBSSSection;
@@ -46,6 +51,10 @@ namespace llvm {
     MCSection *selectSmallSectionForGlobal(const GlobalObject *GO,
                                            SectionKind Kind,
                                            const TargetMachine &TM) const;
+
+    MCSection *selectSectionForLookupTable(const GlobalObject *GO,
+                                           const TargetMachine &TM,
+                                           const Function *Fn) const;
   };
 
 } // namespace llvm

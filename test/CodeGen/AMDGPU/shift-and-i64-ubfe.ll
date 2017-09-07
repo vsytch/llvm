@@ -1,4 +1,9 @@
+<<<<<<< HEAD
 ; RUN:  llc -amdgpu-scalarize-global-loads=false  -march=amdgcn -verify-machineinstrs < %s | FileCheck -check-prefix=GCN %s
+=======
+; RUN: llc -amdgpu-scalarize-global-loads=false -march=amdgcn -mcpu=tahiti -verify-machineinstrs < %s | FileCheck -check-prefix=GCN %s
+; FIXME: Fails with -enable-var-scope
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 
 ; Make sure 64-bit BFE pattern does a 32-bit BFE on the relevant half.
 

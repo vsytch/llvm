@@ -26,6 +26,7 @@
 #include "llvm/DebugInfo/DWARF/DWARFDebugMacro.h"
 #include "llvm/DebugInfo/DWARF/DWARFDie.h"
 #include "llvm/DebugInfo/DWARF/DWARFGdbIndex.h"
+#include "llvm/DebugInfo/DWARF/DWARFObject.h"
 #include "llvm/DebugInfo/DWARF/DWARFSection.h"
 #include "llvm/DebugInfo/DWARF/DWARFTypeUnit.h"
 #include "llvm/DebugInfo/DWARF/DWARFUnit.h"
@@ -42,13 +43,24 @@
 namespace llvm {
 
 class DataExtractor;
+<<<<<<< HEAD
 class MemoryBuffer;
 class raw_ostream;
 
+=======
+class MCRegisterInfo;
+class MemoryBuffer;
+class raw_ostream;
+
+/// Used as a return value for a error callback passed to DWARF context.
+/// Callback should return Halt if client application wants to stop
+/// object parsing, or should return Continue otherwise.
+enum class ErrorPolicy { Halt, Continue };
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 /// DWARFContext
 /// This data structure is the top level entity that deals with dwarf debug
-/// information parsing. The actual data is supplied through pure virtual
-/// methods that a concrete implementation provides.
+/// information parsing. The actual data is supplied through DWARFObj.
 class DWARFContext : public DIContext {
   DWARFUnitSection<DWARFCompileUnit> CUs;
   std::deque<DWARFUnitSection<DWARFTypeUnit>> TUs;
@@ -78,6 +90,9 @@ class DWARFContext : public DIContext {
   StringMap<std::weak_ptr<DWOFile>> DWOFiles;
   std::weak_ptr<DWOFile> DWP;
   bool CheckedForDWP = false;
+  std::string DWPName;
+
+  std::unique_ptr<MCRegisterInfo> RegInfo;
 
   /// Read compile units from the debug_info section (if necessary)
   /// and store them in CUs.
@@ -95,10 +110,22 @@ class DWARFContext : public DIContext {
   /// and store them in DWOTUs.
   void parseDWOTypeUnits();
 
+protected:
+  std::unique_ptr<const DWARFObject> DObj;
+
 public:
+<<<<<<< HEAD
   DWARFContext() : DIContext(CK_DWARF) {}
+=======
+  DWARFContext(std::unique_ptr<const DWARFObject> DObj,
+               std::string DWPName = "");
+  ~DWARFContext();
+
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   DWARFContext(DWARFContext &) = delete;
   DWARFContext &operator=(DWARFContext &) = delete;
+
+  const DWARFObject &getDWARFObj() const { return *DObj; }
 
   static bool classof(const DIContext *DICtx) {
     return DICtx->getKind() == CK_DWARF;
@@ -222,6 +249,7 @@ public:
   DIInliningInfo getInliningInfoForAddress(uint64_t Address,
       DILineInfoSpecifier Specifier = DILineInfoSpecifier()) override;
 
+<<<<<<< HEAD
   virtual StringRef getFileName() const = 0;
   virtual bool isLittleEndian() const = 0;
   virtual uint8_t getAddressSize() const = 0;
@@ -268,11 +296,33 @@ public:
   virtual StringRef getGdbIndexSection() = 0;
   virtual StringRef getTUIndexSection() = 0;
 
+=======
+  bool isLittleEndian() const { return DObj->isLittleEndian(); }
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
   static bool isSupportedVersion(unsigned version) {
     return version == 2 || version == 3 || version == 4 || version == 5;
   }
 
   std::shared_ptr<DWARFContext> getDWOContext(StringRef AbsolutePath);
+
+  const MCRegisterInfo *getRegisterInfo() const { return RegInfo.get(); }
+
+  /// Function used to handle default error reporting policy. Prints a error
+  /// message and returns Continue, so DWARF context ignores the error.
+  static ErrorPolicy defaultErrorHandler(Error E);
+  static std::unique_ptr<DWARFContext>
+  create(const object::ObjectFile &Obj, const LoadedObjectInfo *L = nullptr,
+         function_ref<ErrorPolicy(Error)> HandleError = defaultErrorHandler,
+         std::string DWPName = "");
+
+  static std::unique_ptr<DWARFContext>
+  create(const StringMap<std::unique_ptr<MemoryBuffer>> &Sections,
+         uint8_t AddrSize, bool isLittleEndian = sys::IsLittleEndianHost);
+
+  /// Loads register info for the architecture of the provided object file.
+  /// Improves readability of dumped DWARF expressions. Requires the caller to
+  /// have initialized the relevant target descriptions.
+  Error loadRegisterInfo(const object::ObjectFile &Obj);
 
 private:
   /// Return the compile unit that includes an offset (relative to .debug_info).
@@ -283,6 +333,7 @@ private:
   DWARFCompileUnit *getCompileUnitForAddress(uint64_t Address);
 };
 
+<<<<<<< HEAD
 /// Used as a return value for a error callback passed to DWARF context.
 /// Callback should return Halt if client application wants to stop
 /// object parsing, or should return Continue otherwise.
@@ -411,6 +462,8 @@ public:
   StringRef getTUIndexSection() override { return TUIndexSection; }
 };
 
+=======
+>>>>>>> 088a118f83a6aef379d0de80ceb9aa764854b9d0
 } // end namespace llvm
 
 #endif // LLVM_DEBUGINFO_DWARF_DWARFCONTEXT_H
